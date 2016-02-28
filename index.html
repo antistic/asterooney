@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Mish</title>
+
+        <link rel="stylesheet" href="src/Client/css/style.css" type="text/css" media="all" />
+        <!-- font -->
+        <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+
+         <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+        <!--<script src="http://169.44.56.248:3000/socket.io/socket.io.js"></script>-->
+    </head>
+
+    <body>
+        <div id="Container">
+            <canvas id="canvas"></canvas>
+        </div>
+        <div id="Overlay">
+            <div id="Splash">
+		        <h2>Enter a nickname:</h2>
+		        <input id="nickname" type="text" placeholder="Player" onkeydown="onEnter()">
+		        <button id="submit" type="submit" onclick="connectToServer()">Go!</button>
+            </div>
+        </div>
+
+        <script src="src/Client/js/app.js" type="text/javascript" charset="utf-8"></script>
+    </body>
+</html>
