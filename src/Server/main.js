@@ -1,5 +1,5 @@
 
-var app = require('/usr/local/lib/node_modules/express')();
+var app = require('express')();
 var http = require('http').Server(app);
 var io = require('/usr/local/lib/node_modules/socket.io')(http);
 
@@ -48,7 +48,7 @@ function Craft(sock, id, birth){
     this.firing = false;
     this.firecooldown = 0;
 
-    this.move = function(){ 
+    this.move = function(){
 
         if(this.firecooldown > 0) this.firecooldown--;
         this.rotation += this.rotate;
@@ -113,7 +113,7 @@ function Asteroid(rad){
 
     this.move = function(){
         this.vel.mult(0.997);
-        this.pos.translate(this.vel); 
+        this.pos.translate(this.vel);
     };
 
     this.getCondensed = function(){
@@ -126,7 +126,7 @@ function Asteroid(rad){
 // Returns distance between two points (vectors)
 function distancesq(p1, p2){
     var x = p1.x - p2.x;
-    var y = p1.y - p2.y; 
+    var y = p1.y - p2.y;
     return x * x + y * y;
 }
 
@@ -346,13 +346,13 @@ function disposeOfDeadBodies(){
         else crafts[l] = crafts[r];
     }
     // get rid of dead ones
-    
+
     for(var x = 0; x < crafts.length; x++){
         for(var y = r + 1; y < crafts.length; y++){
             crafts[x].socket.emit('snuffed', crafts[y].ID, crafts[y].pos);
         }
     }
-    
+
     crafts = crafts.slice(0, r + 1);
 }
 
