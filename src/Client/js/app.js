@@ -2,7 +2,7 @@ var cvs, ctx;
 var ship_cvs, shipo_cvs, shipy_cvs;
 var flameToggle = true;
 
-var socket = io('http://169.44.56.248:3000');
+var socket = io('http://localhost:3000');
 var nick, ID;
 
 // initialise stuff

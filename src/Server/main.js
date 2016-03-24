@@ -1,7 +1,7 @@
 
-var app = require('express')();
+var app = require('/usr/local/lib/node_modules/express')();
 var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var io = require('/usr/local/lib/node_modules/socket.io')(http);
 
 app.get('/', function(req, res){
     res.send('Server\'s alive');
@@ -77,18 +77,10 @@ function Craft(sock, id, birth){
     };
 
     this.getCondensed = function(){
-        return new CraftC(this.nick, this.ID, this.pos, this.rotation, this.powered);
+        var c = ",";
+        return nick +c+ ID +c+ parseInt(this.pos.x, 10) +c+ parseInt(this.pos.x, 10) +c+
+                this.rotation +c+ (this.powered? 1 : 0);
     };
-}
-
-// packages the important information about
-// a craft in an object (Condensed Craft)
-function CraftC(nickn, id, poss, rotate, power){
-    this.nick = nickn;
-    this.ID = id;
-    this.pos = poss;
-    this.rotation = rotate;
-    this.powered = power;
 }
 
 function Bullet(craft){
@@ -110,12 +102,8 @@ function Bullet(craft){
     };
 
     this.getCondensed = function(){
-        return new BulletC(this.pos);
+        return parseInt(this.pos.x, 10) + "," + parseInt(this.pos.y, 10);
     };
-}
-
-function BulletC(poss){
-    this.pos = poss;
 }
 
 function Asteroid(rad){
@@ -129,13 +117,8 @@ function Asteroid(rad){
     };
 
     this.getCondensed = function(){
-        return new AsteroidC(this.pos, this.radius);
+        return parseInt(this.pos.x, 10) + "," + parseInt(this.pos.y, 10) + "," + rad;
     };
-}
-
-function AsteroidC(poss, rad){
-    this.pos = poss; 
-    this.radius = rad;
 }
 
 // Helper methods
@@ -185,9 +168,6 @@ function validStartingPoint(x,y, radius){
 }
 
 function checkFor(objects, vec, radius){
-
-    console.log(objects.length);
-
     for (var i = 0 ; i < objects.length ; i++){
         if (distancesq(vec, objects[i].pos) < radius){
             return false;
@@ -196,7 +176,7 @@ function checkFor(objects, vec, radius){
    return true;
 }
 
-// NOTE: has been split in three for clarity/readability :)
+
 function doTick(){
     moveObjects();
     checkCollisions();
@@ -346,15 +326,10 @@ function disposeOfDeadBodies(){
     var r = bullets.length;
     var l = 0;
     for(r = bullets.length - 1; r >= 0; r--){
-
         if(!bullets[r].isAlive()) continue;
         while(bullets[l].isAlive() && l !== r) l++;
-
-        if(l === r){
-            break;
-        }else{
-            bullets[l] = bullets[r];
-        }
+        if(l === r) break;
+        else bullets[l] = bullets[r];
     }
     // get rid of dead ones
     bullets = bullets.slice(0, r + 1);
@@ -365,15 +340,10 @@ function disposeOfDeadBodies(){
     r = crafts.length;
     l = 0;
     for(r = crafts.length - 1; r >= 0; r--){
-
         if(crafts[r].dead) continue;
         while(!crafts[l].dead && l !== r) l++;
-
-        if(l === r){
-            break;
-        }else{
-            crafts[l] = crafts[r];
-        }
+        if(l === r) break;
+        else crafts[l] = crafts[r];
     }
     // get rid of dead ones
     
@@ -444,41 +414,26 @@ io.sockets.on('connection', function(socket){
     });
 
     socket.on('disconnect', function(){
-       /*
-       console.log(craft.ID + " has disappeared...");
-       // TODO
-       // remove craft from list
-       var c;
-       for(var x = 0; x < crafts.length; x++){
-           if(crafts[x].ID === craft.ID){
-               crafts[x] = crafts[crafts.length - 1];
-               crafts.pop();
-               if(crafts.length === 0) stopSim();
-               return;
-           }
-       }
-       throw "missing craft";*/
+       //TODO something?
     });
 
 });
 
 function sendShit(){
 
-    // leaderboard is array of strings
-    // leaderboard[0] = 1st place
-    var craftsC = [];
-    var asteroidsC  = [];
-    var bulletsC = [];
-    var leaderboard = [];
+    var craftsC = "";
+    var asteroidsC  = "";
+    var bulletsC = "";
+    var leaderboard = "";
 
     for(var x = 0; x < crafts.length; x++){
-        craftsC.push(crafts[x].getCondensed());
+        craftsC += crafts[x].getCondensed() + ";";
     }
     for(var x = 0; x < asteroids.length; x++){
-        asteroidsC.push(asteroids[x].getCondensed());
+        asteroidsC += asteroids[x].getCondensed() + ";";
     }
     for(var x = 0; x < bullets.length; x++){
-        bulletsC.push(bullets[x].getCondensed());
+        bulletsC += bullets[x].getCondensed() + ";";
     }
 
     crafts.sort(function(a, b){
@@ -486,12 +441,12 @@ function sendShit(){
     });
 
     for(var x = 0; x < 10 && x < crafts.length; x++){
-        leaderboard.push(crafts[x].nick);
+        leaderboard += crafts[x].nick + ";";
     }
 
     for(var x = 0; x < crafts.length; x++){
         var socket = crafts[x].socket;
-        socket.emit('map', crafts[x], craftsC, asteroidsC, bulletsC, leaderboard);
+        socket.emit('map', x, craftsC, asteroidsC, bulletsC, leaderboard);
     }
 }
 
