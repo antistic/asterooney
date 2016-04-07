@@ -306,7 +306,7 @@ function startSim(){
     simulator = setInterval(function(){
         doTick();
         sendShit();
-    }, 30);
+    }, 33);
 }
 
 function stopSim(){
