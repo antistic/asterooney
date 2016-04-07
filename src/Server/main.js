@@ -76,8 +76,12 @@ function Craft(sock, id, birth){
 
     this.getCondensed = function(){
         var c = ",";
-        return nick +c+ ID +c+ parseInt(this.pos.x, 10) +c+ parseInt(this.pos.x, 10) +c+
-                this.rotation +c+ (this.powered? 1 : 0);
+        return this.nick +c+
+               ID +c+
+               parseInt(this.pos.x, 10) +c+
+               parseInt(this.pos.x, 10) +c+
+               this.rotation +c+
+               (this.powered? 1 : 0);
     };
 }
 
@@ -100,7 +104,8 @@ function Bullet(craft){
     };
 
     this.getCondensed = function(){
-        return parseInt(this.pos.x, 10) + "," + parseInt(this.pos.y, 10);
+        return parseInt(this.pos.x, 10) + "," +
+               parseInt(this.pos.y, 10);
     };
 }
 
@@ -115,7 +120,9 @@ function Asteroid(rad){
     };
 
     this.getCondensed = function(){
-        return parseInt(this.pos.x, 10) + "," + parseInt(this.pos.y, 10) + "," + rad;
+        return parseInt(this.pos.x, 10) + "," +
+               parseInt(this.pos.y, 10) + "," +
+               rad;
     };
 }
 
