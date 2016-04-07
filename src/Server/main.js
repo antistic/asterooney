@@ -10,22 +10,15 @@ http.listen(3000, function(){
     console.log('info : ini : start on 3000');
 });
 
-var ID = 58663;
-
-// Objects used
+var ID = 0;
 
 function Vector(myX, myY){
-    this.x = myX;
-    this.y = myY;
-
+    this.x = myX; this.y = myY;
     this.translate = function(vec){
-        this.x += vec.x;
-        this.y += vec.y;
+        this.x += vec.x; this.y += vec.y;
     };
-
     this.mult = function(m){
-        this.x *= m;
-        this.y *= m;
+        this.x *= m; this.y *= m;
     };
 }
 
@@ -40,7 +33,6 @@ function Craft(sock, id, birth){
     this.rotation = 0;
     this.radius = 22;
     this.dead = false;
-
     this.powered = false;
     this.breaking = false;
     this.rotate = 0;
@@ -86,7 +78,8 @@ function Craft(sock, id, birth){
 }
 
 function Bullet(craft){
-    this.vel = new Vector(Math.sin(craft.rotation) * 17 + craft.vel.x, -Math.cos(craft.rotation) * 17 + craft.vel.y);
+    this.vel = new Vector(Math.sin(craft.rotation) * 17 + craft.vel.x, 
+                          -Math.cos(craft.rotation) * 17 + craft.vel.y);
     this.pos = new Vector(craft.pos.x, craft.pos.y);
     this.lifeLeft = 160;
     this.radius = 3;   // rad is 3 for client side drawing (y)
@@ -126,9 +119,6 @@ function Asteroid(rad){
     };
 }
 
-// Helper methods
-
-// Returns distance between two points (vectors)
 function distancesq(p1, p2){
     var x = p1.x - p2.x;
     var y = p1.y - p2.y;
@@ -146,10 +136,9 @@ var asteroids = [];
 var bullets = [];
 
 // TODO: initialize these with dimensions of full field
-var totalHeight = 10000;
-var totalWidth = 10000;
+var totalHeight = totalWidth = 10000;
 
-// TODds a free spot on the map and returns the vector
+// finds a free spot on the map and returns the vector
 function findStartingPoint(radius){
     // Randomly choose coordinates until you find
     // a pair that is not within a certain radius
@@ -161,7 +150,6 @@ function findStartingPoint(radius){
         x = Math.floor(Math.random()*totalWidth);
         y = Math.floor(Math.random()*totalHeight);
     }
-
     return new Vector(x,y);
 }
 
@@ -173,14 +161,10 @@ function validStartingPoint(x,y, radius){
 }
 
 function checkFor(objects, vec, radius){
-    for (var i = 0 ; i < objects.length ; i++){
-        if (distancesq(vec, objects[i].pos) < radius){
-            return false;
-        }
-    }
-   return true;
+    for (var i = 0 ; i < objects.length ; i++) 
+        if(distancesq(vec, objects[i].pos) < radius * radius) return false;
+    return true;
 }
-
 
 function doTick(){
     moveObjects();
@@ -188,76 +172,37 @@ function doTick(){
     disposeOfDeadBodies();
 }
 
-// Move everything
 function moveObjects(){
-    // Move all crafts
     for(var x = 0; x < crafts.length; x++){
         crafts[x].move();
         if(crafts[x].firing){
             crafts[x].firing = false;
-            // add new Bullet
             bullets.push(new Bullet(crafts[x]));
         }
     }
+    for(var x = 0; x < bullets.length; x++) bullets[x].move();
+    for(var x = 0; x < asteroids.length; x++) asteroids[x].move();
+}
 
-    // Move all bullets
-    for(var x = 0; x < bullets.length; x++){
-        bullets[x].move();
-    }
-
-    // Move all asteroids
-    for(var x = 0; x < asteroids.length; x++){
-        asteroids[x].move();
-    }
+function boxObject(vec){
+    if(vec.x < 0) vec.x += totalWidth;
+    if(vec.y < 0) vec.y += totalHeight;
+    if(vec.x >= totalWidth) vec.x -= totalWidth;
+    if(vec.y >= totalHeight) vec.y -= totalHeight;
 }
 
 // Hit everything
 function checkCollisions(){
 
-    // Crafts against boundary
-    for (var x = 0 ; x < crafts.length ; x++){
-        if (crafts[x].pos.x < 0 || crafts[x].pos.x >= totalWidth){
-            crafts[x].vel.x *= -1;
-            crafts[x].bounceMove();
-        }
-        else if (crafts[x].pos.y < 0 || crafts[x].pos.y >= totalHeight){
-            crafts[x].vel.y *= -1;
-            crafts[x].bounceMove();
-        }
-    }
-
-    // Asteroids against boundary
-    for (var x = 0 ; x < asteroids.length ; x++){
-        if (asteroids[x].pos.x < 0 || asteroids[x].pos.x >= totalWidth){
-            asteroids[x].vel.x *= -1;
-            asteroids[x].move();
-        }
-        else if (asteroids[x].pos.y < 0 || asteroids[x].pos.y >= totalHeight){
-            asteroids[x].vel.y *= -1;
-            asteroids[x].move();
-        }
-    }
-
-    // Bullets against boundary
-    for (var x = 0 ; x < bullets.length ; x++){
-        if (bullets[x].pos.x < 0 || bullets[x].pos.x >= totalWidth){
-            bullets[x].vel.x *= -1;
-            bullets[x].move();
-        }
-        else if (bullets[x].pos.y < 0 || bullets[x].pos.y >= totalHeight){
-            bullets[x].vel.y *= -1;
-            bullets[x].move();
-        }
-    }
+    for (var x = 0; x < crafts.length; x++) boxObject(crafts[x].pos);
+    for (var x = 0; x < asteroids.length; x++) boxObject(asteroids[x].pos);
+    for (var x = 0; x < bullets.length; x++) boxObject(bullets[x].pos);
 
     // Asteroids against crafts
-    for(var x = 0; x < crafts.length; x++){
-        for(var y = 0; y < asteroids.length; y++){
-            if(isTouching(asteroids[y], crafts[x])){
+    for(var x = 0; x < crafts.length; x++)
+        for(var y = 0; y < asteroids.length; y++)
+            if(isTouching(asteroids[y], crafts[x]))
                 crafts[x].dead = true;
-            }
-        }
-    }
 
     // Asteroids against asteroids
     for(var x = 0; x < asteroids.length - 1; x++){
@@ -323,11 +268,8 @@ function checkCollisions(){
     }
 }
 
-
 function disposeOfDeadBodies(){
-    // any bullets might be dead so check them all
-    // move any dead ones to the back
-    // A[0..l) are alive and A[r+1..n) are dead
+
     var r = bullets.length;
     var l = 0;
     for(r = bullets.length - 1; r >= 0; r--){
@@ -336,12 +278,8 @@ function disposeOfDeadBodies(){
         if(l === r) break;
         else bullets[l] = bullets[r];
     }
-    // get rid of dead ones
     bullets = bullets.slice(0, r + 1);
 
-    // any crafts might be dead so check them all
-    // move any dead ones to the back
-    // A[0..l) are alive and A[r+1..n) are dead
     r = crafts.length;
     l = 0;
     for(r = crafts.length - 1; r >= 0; r--){
@@ -350,20 +288,15 @@ function disposeOfDeadBodies(){
         if(l === r) break;
         else crafts[l] = crafts[r];
     }
-    // get rid of dead ones
-
-    for(var x = 0; x < crafts.length; x++){
-        for(var y = r + 1; y < crafts.length; y++){
+    
+    for(var x = 0; x < crafts.length; x++) 
+        for(var y = r + 1; y < crafts.length; y++)
             crafts[x].socket.emit('snuffed', crafts[y].ID, crafts[y].pos);
-        }
-    }
 
     crafts = crafts.slice(0, r + 1);
-    
     if(crafts.length === 0) stopSim();
 }
 
-// network and simulator stuff
 var simulator;
 var running = false;
 
@@ -379,8 +312,7 @@ function startSim(){
 function stopSim(){
     running = false;
     clearInterval(simulator);
-    console.log('info : sim : stop');
-    // for the trees mate
+    console.log('info : sim : stop'); // for the trees mate
 }
 
 // When a client joins
@@ -422,37 +354,18 @@ io.sockets.on('connection', function(socket){
 });
 
 function sendShit(){
+    var craftsC = "", asteroidsC  = "", bulletsC = "", leaderboard = "";
+    for(var x = 0; x < crafts.length; x++) craftsC += crafts[x].getCondensed() + ";";
+    for(var x = 0; x < asteroids.length; x++) asteroidsC += asteroids[x].getCondensed() + ";";
+    for(var x = 0; x < bullets.length; x++) bulletsC += bullets[x].getCondensed() + ";";
+    crafts.sort(function(a, b){ return a.birth - b.birth; });
+    for(var x = 0; x < 10 && x < crafts.length; x++) leaderboard += crafts[x].nick + ";";
 
-    var craftsC = "";
-    var asteroidsC  = "";
-    var bulletsC = "";
-    var leaderboard = "";
-
-    for(var x = 0; x < crafts.length; x++){
-        craftsC += crafts[x].getCondensed() + ";";
-    }
-    for(var x = 0; x < asteroids.length; x++){
-        asteroidsC += asteroids[x].getCondensed() + ";";
-    }
-    for(var x = 0; x < bullets.length; x++){
-        bulletsC += bullets[x].getCondensed() + ";";
-    }
-
-    crafts.sort(function(a, b){
-       return a.birth - b.birth;
-    });
-
-    for(var x = 0; x < 10 && x < crafts.length; x++){
-        leaderboard += crafts[x].nick + ";";
-    }
-
-    for(var x = 0; x < crafts.length; x++){
-        var socket = crafts[x].socket;
-        socket.emit('map', x, craftsC, asteroidsC, bulletsC, leaderboard);
-    }
+    for(var x = 0; x < crafts.length; x++)
+        crafts[x].socket.emit('map', x, craftsC, asteroidsC, bulletsC, leaderboard);
 }
 
-// Set up the map with asteroids
+initialSetUp();
 function initialSetUp(){
     var numAsteroids = 20;
     for (var i = 0 ; i < numAsteroids ; i++){
@@ -461,6 +374,3 @@ function initialSetUp(){
         asteroids.push(newast);
     }
 }
-
-// make that actually happen
-initialSetUp();
