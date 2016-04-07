@@ -7,7 +7,7 @@ app.get('/', function(req, res){
 });
 
 http.listen(3000, function(){
-    console.log('alive on :3000');
+    console.log('info : ini : start on 3000');
 });
 
 var ID = 58663;
@@ -359,6 +359,8 @@ function disposeOfDeadBodies(){
     }
 
     crafts = crafts.slice(0, r + 1);
+    
+    if(crafts.length === 0) stopSim();
 }
 
 // network and simulator stuff
@@ -367,7 +369,7 @@ var running = false;
 
 function startSim(){
     running = true;
-    console.log('running sim');
+    console.log('info : sim : start');
     simulator = setInterval(function(){
         doTick();
         sendShit();
@@ -377,20 +379,20 @@ function startSim(){
 function stopSim(){
     running = false;
     clearInterval(simulator);
-    console.log('low power mode');
+    console.log('info : sim : stop');
     // for the trees mate
 }
 
 // When a client joins
 io.sockets.on('connection', function(socket){
 
-    console.log("got a connection");
+    console.log("info : soc : connect");
     craft = new Craft(socket, ID++);
 
     socket.on('nick', function(nick){
         craft.nick = nick;
         craft.birth = Date.now();
-        console.log("Welcome " + nick + " ;)");
+        console.log("info : soc : " + nick + " joined");
         craft.pos = findStartingPoint(100);
         //findStartingPoint(craft);
         crafts.push(craft);
@@ -417,11 +419,6 @@ io.sockets.on('connection', function(socket){
                 if(on) craft.tryFiring();
         }
     });
-
-    socket.on('disconnect', function(){
-       //TODO something?
-    });
-
 });
 
 function sendShit(){
