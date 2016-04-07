@@ -21,11 +21,26 @@ function init() {
     ship_cvs = prerenderShip("none");
     ship_ctx = ship_cvs.getContext("2d");
 
-    window.onresize = function(e){
+    window.addEventListener("resize", resizeCanvasToWindow, false);
+    var submitButton = document.getElementById("submit");
+    submitButton.addEventListener("click", onSubmit, false);
+    var input = document.getElementById("nickname");
+    input.addEventListener("keyup", onEnter, false);
+
+    resizeCanvasToWindow();
+    drawGrid(80, 80);
+}
+function onEnter(e){
+    if(e.keyCode == 13){
+        document.getElementById("submit").click();
+    }
+}
+function onSubmit(){
+    connectToServer();
+}
+function resizeCanvasToWindow(){
         cvs.height = window.innerHeight;
         cvs.width = window.innerWidth;
-        drawGrid(80, 80);
-    };
 }
 
 function prerenderShip(option){
@@ -52,20 +67,6 @@ function prerenderShip(option){
 
     return scvs;
 }
-
-// when you press enter in the nickname input
-function onEnter(){
-    if(event.keyCode == 13){
-        document.getElementById("submit").click();
-    }
-}
-
-function connectToServer(){
-    nick = document.getElementById("nickname").value || "Player";
-    console.log('connecting to server');
-    socket.emit('nick', nick);
-}
-
 // Draw the convas
 // Called whenever info arrives from the server
 function draw(x, crafts, asteroids, bullets, leaderboard) {
@@ -193,6 +194,11 @@ function drawCraft(x, y, craft){
 function drawBullet(x, y){
     drawCircle(ctx, x-2, y-2, 3, "#0F0");
 }
+function connectToServer(){
+    nick = document.getElementById("nickname").value || "Player";
+    console.log("connecting to server, " + nick);
+    socket.emit("nick", nick);
+}
 socket.on('map', function(craftNumber, crafts, asteroids, bullets, leaderboard){
     var crafts_expanded = parse_condensed(crafts);
     var asteroids_expanded = parse_condensed(asteroids);
@@ -200,7 +206,6 @@ socket.on('map', function(craftNumber, crafts, asteroids, bullets, leaderboard){
     draw(craftNumber, crafts_expanded, asteroids_expanded, bullets_expanded, leaderboard);
 });
 
-// when a player dies
 socket.on('ready', function(IDd){
     ID = IDd;
     document.getElementById("Overlay").classList.add('hidden');
