@@ -1,5 +1,6 @@
 var cvs, ctx;
 var ship_cvs, shipo_cvs, shipy_cvs;
+var ship_ctx;
 var flameToggle = true;
 
 var socket = io('http://localhost:3000');
@@ -18,6 +19,7 @@ function init() {
     shipo_cvs = prerenderShip("orange");
     shipy_cvs = prerenderShip("yellow");
     ship_cvs = prerenderShip("none");
+    ship_ctx = ship_cvs.getContext("2d");
 
     window.onresize = function(e){
         cvs.height = window.innerHeight;
@@ -171,7 +173,7 @@ function drawCircle(contxt, x, y, radius, colour){
 
 function drawCraft(x, y, craft){
     // draw nickname. styles for these are set in draw()
-    ctx.fillText(craft.nick, y + height/2 + 10, x);
+    ctx.fillText(craft.nick, y + ship_ctx.height/2 + 10, x);
 
     ctx.translate(x, y);
     ship_ctx.rotate(craft.rotation);
