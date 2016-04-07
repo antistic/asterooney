@@ -84,13 +84,13 @@ function Bullet(craft){
     this.lifeLeft = 160;
     this.radius = 3;   // rad is 3 for client side drawing (y)
 
-    this.move();
-    this.move();
-
     this.move = function(){
         this.pos.translate(this.vel);
         this.lifeLeft--;
     };
+    
+    this.move();
+    this.move();
 
     this.isAlive = function(){
         return this.lifeLeft > 0;
