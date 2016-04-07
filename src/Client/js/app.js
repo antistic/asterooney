@@ -67,6 +67,7 @@ function prerenderShip(option){
     return scvs;
 }
 function drawGrid(x, y){
+    // TODO: tidy up drawGrid
     var gridSize = 160;
     var w = x - canvas.width/2
     var h = y - canvas.height/2;
@@ -165,7 +166,6 @@ function drawThings(x, y, things, thingType){
         drawMethod(xPos, yPos, things[i]);
     }
 }
-
 function drawAsteroid(x, y, asteroid){
     ctx.beginPath();
     ctx.arc(x, y, asteroid.radius, 0, 2*Math.PI);
@@ -175,14 +175,12 @@ function drawAsteroid(x, y, asteroid){
     ctx.strokeStyle = "aqua";
     ctx.stroke();
 }
-
 function drawCircle(contxt, x, y, radius, colour){
     contxt.beginPath();
     contxt.arc(x, y, radius, 0, 2*Math.PI);
     contxt.fillStyle = colour;
     contxt.fill();
 }
-
 function drawCraft(x, y, craft){
     var nick = craft[0];
     var rotation = craft[4];
@@ -203,10 +201,10 @@ function drawCraft(x, y, craft){
     }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
-
 function drawBullet(x, y){
     drawCircle(ctx, x-2, y-2, 3, "#0F0");
 }
+
 function connectToServer(){
     nick = document.getElementById("nickname").value || "Player";
     console.log("connecting to server, " + nick);
