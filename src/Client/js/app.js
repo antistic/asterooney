@@ -14,7 +14,6 @@ function init() {
 
     cvs.height = window.innerHeight;
     cvs.width = window.innerWidth;
-    drawGrid(800, 800);
 
     shipo_cvs = prerenderShip("orange");
     shipy_cvs = prerenderShip("yellow");
@@ -67,20 +66,6 @@ function prerenderShip(option){
 
     return scvs;
 }
-// Draw the convas
-// Called whenever info arrives from the server
-function draw(x, crafts, asteroids, bullets, leaderboard) {
-    ctx.font = "12px sans-serif";
-    ctx.textAlign = "center";
-    var originX = crafts[x].pos.x;
-    var originY = crafts[x].pos.y;
-
-    drawGrid(originX, originY);
-    drawThings(originX, originY, asteroids, drawAsteroid);
-    drawThings(originX, originY, crafts, drawCraft);
-    drawThings(originX, originY, bullets, drawBullet);
-}
-
 function drawGrid(x, y){
     var gridSize = 160;
     var w = x - canvas.width/2
@@ -146,11 +131,37 @@ function drawGrid(x, y){
         ctx.stroke();
     }
 }
+function draw(craftNumber, crafts, asteroids, bullets, leaderboard) {
+    ctx.font = "12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "white";
+    var originX = crafts[craftNumber][2];
+    var originY = crafts[craftNumber][3];
 
-function drawThings(x, y, things, drawMethod){
-    for(var i; i < things.length; i++){
-        var xPos = (things[i].pos.x - x) + cvs.width/2;
-        var yPos = (things[i].pos.y - y) + cvs.height/2;
+    drawGrid(originX, originY);
+    // drawThings(originX, originY, asteroids, drawAsteroid);
+    drawThings(originX, originY, crafts, "craft");
+    // drawThings(originX, originY, bullets, drawBullet);
+}
+function drawThings(x, y, things, thingType){
+    switch(thingType){
+        case "craft":
+            var drawMethod = drawCraft;
+            getX = 2; getY = 3;
+            break;
+        case "asteroid":
+            var drawMethod = drawAsteroid;
+            getX = 2; getY = 3;
+            break;
+        case "bullet":
+            var drawMethod = drawBullet;
+            getX = 1; getY = 2;
+            break;
+    };
+
+    for(var i=0; i < things.length; i++){
+        var xPos = (things[i][getX] - x) + cvs.width/2;
+        var yPos = (things[i][getY] - y) + cvs.height/2;
         drawMethod(xPos, yPos, things[i]);
     }
 }
@@ -173,11 +184,13 @@ function drawCircle(contxt, x, y, radius, colour){
 }
 
 function drawCraft(x, y, craft){
+    var nick = craft[0];
+    var rotation = craft[4];
     // draw nickname. styles for these are set in draw()
-    ctx.fillText(craft.nick, y + ship_ctx.height/2 + 10, x);
+    ctx.fillText(nick, y + ship_ctx.height/2 + 10, x);
 
     ctx.translate(x, y);
-    ship_ctx.rotate(craft.rotation);
+    ctx.rotate(rotation);
     if (craft.powered){
         if (flameToggle){
             ctx.drawImage(shipo_cvs, -24, -27);
@@ -205,7 +218,17 @@ socket.on('map', function(craftNumber, crafts, asteroids, bullets, leaderboard){
     var bullets_expanded = parse_condensed(bullets);
     draw(craftNumber, crafts_expanded, asteroids_expanded, bullets_expanded, leaderboard);
 });
+function parse_condensed(items) {
+    r = items.split(';');
+    // remove last element (there is always an extra ';', so an extra element is made on split)
+    r.pop();
 
+    for (var i=0; i < r.length; i++) {
+        r[i] = r[i].split(',');
+    }
+
+    return r
+}
 socket.on('ready', function(IDd){
     ID = IDd;
     document.getElementById("Overlay").classList.add('hidden');
