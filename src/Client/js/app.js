@@ -68,7 +68,7 @@ function prerenderShip(option){
 }
 function drawGrid(x, y){
     // TODO: tidy up drawGrid
-    var gridSize = 160;
+    var gridSize = 100;
     var w = x - canvas.width/2
     var h = y - canvas.height/2;
     var offsetX = w % gridSize;
@@ -145,25 +145,30 @@ function draw(craftNumber, crafts, asteroids, bullets, leaderboard) {
     // drawThings(originX, originY, bullets, drawBullet);
 }
 function drawThings(x, y, things, thingType){
+    var drawMethod;
     switch(thingType){
         case "craft":
-            var drawMethod = drawCraft;
+            drawMethod = drawCraft;
             getX = 2; getY = 3;
             break;
         case "asteroid":
-            var drawMethod = drawAsteroid;
+            drawMethod = drawAsteroid;
             getX = 2; getY = 3;
             break;
         case "bullet":
-            var drawMethod = drawBullet;
+            drawMethod = drawBullet;
             getX = 1; getY = 2;
             break;
     };
 
     for(var i=0; i < things.length; i++){
-        var xPos = (things[i][getX] - x) + cvs.width/2;
-        var yPos = (things[i][getY] - y) + cvs.height/2;
-        drawMethod(xPos, yPos, things[i]);
+        for(var f = -10000; f <= 10000; f += 10000){
+            for(var g = -10000; g <= 10000; g += 10000){
+                var xPos = (things[i][getX] - x) + cvs.width/2 + f;
+                var yPos = (things[i][getY] - y) + cvs.height/2 + g;
+                drawMethod(xPos, yPos, things[i]);
+            }
+        }
     }
 }
 function drawAsteroid(x, y, asteroid){
