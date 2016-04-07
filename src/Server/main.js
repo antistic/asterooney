@@ -1,7 +1,6 @@
-
 var app = require('express')();
 var http = require('http').Server(app);
-var io = require('/usr/local/lib/node_modules/socket.io')(http);
+var io = require('socket.io')(http);
 
 app.get('/', function(req, res){
     res.send('Server\'s alive');
@@ -49,7 +48,6 @@ function Craft(sock, id, birth){
     this.firecooldown = 0;
 
     this.move = function(){
-
         if(this.firecooldown > 0) this.firecooldown--;
         this.rotation += this.rotate;
 
