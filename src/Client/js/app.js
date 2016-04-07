@@ -83,34 +83,6 @@ function connectToServer(){
     socket.emit('nick', nick);
 }
 
-socket.on('ready', function(IDd){
-    ID = IDd;
-    // hides Splash
-    document.getElementById("Overlay").classList.add('hidden');
-
-    // bind keys
-    // Ant - this works - don't touch it <3
-    window.onkeydown = function(e) {
-        sendKey(e, true);
-    };
-    window.onkeyup = function(e) {
-        sendKey(e, false);
-    };
-
-    // window resize
-    window.onresize = function(e){
-        cvs.height = window.innerHeight;
-        cvs.width = window.innerWidth;
-        // redraw only happens when the server sends the info
-    };
-
-    console.log("started :D");
-});
-
-socket.on('map', function(x, crafts, asteroids, bullets, leaderboard){
-    draw(x, crafts, asteroids, bullets, leaderboard);
-});
-
 // Draw the convas
 // Called whenever info arrives from the server
 function draw(x, crafts, asteroids, bullets, leaderboard) {
@@ -238,8 +210,29 @@ function drawCraft(x, y, craft){
 function drawBullet(x, y){
     drawCircle(ctx, x-2, y-2, 3, "#0F0");
 }
+socket.on('map', function(craftNumber, crafts, asteroids, bullets, leaderboard){
+    var crafts_expanded = parse_condensed(crafts);
+    var asteroids_expanded = parse_condensed(asteroids);
+    var bullets_expanded = parse_condensed(bullets);
+    draw(craftNumber, crafts_expanded, asteroids_expanded, bullets_expanded, leaderboard);
+});
 
 // when a player dies
+socket.on('ready', function(IDd){
+    ID = IDd;
+    document.getElementById("Overlay").classList.add('hidden');
+
+    window.addEventListener("keydown", function(e) {
+        sendKey(e, true);
+    });
+    window.addEventListener("keydown", function(e) {
+        sendKey(e, false);
+    });
+
+    cvs.focus();
+
+    console.log("started :D");
+});
 socket.on('snuffed', function(IDd, position){
     if(IDd === ID){
         // load up nick choose again
