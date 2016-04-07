@@ -1,5 +1,6 @@
 var cvs, ctx;
 var ship_cvs, shipo_cvs, shipy_cvs;
+var ship_ctx;
 var flameToggle = true;
 
 var socket = io('http://localhost:3000');
@@ -13,36 +14,32 @@ function init() {
 
     cvs.height = window.innerHeight;
     cvs.width = window.innerWidth;
-    drawGrid(800, 800);
 
     shipo_cvs = prerenderShip("orange");
     shipy_cvs = prerenderShip("yellow");
     ship_cvs = prerenderShip("none");
+    ship_ctx = ship_cvs.getContext("2d");
 
-    //temp
-    var x = 700, y = 300;
-    ctx.translate(x, y);
-    ctx.rotate(Math.PI*3/4);
-    ctx.drawImage(shipy_cvs, -24, -27);
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    window.addEventListener("resize", resizeCanvasToWindow, false);
+    var submitButton = document.getElementById("submit");
+    submitButton.addEventListener("click", onSubmit, false);
+    var input = document.getElementById("nickname");
+    input.addEventListener("keyup", onEnter, false);
 
-    var x = 200, y = 200;
-    ctx.beginPath();
-    ctx.arc(x, y, 100, 0, 2*Math.PI);
-    ctx.fillStyle = "black";
-    ctx.fill();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "aqua";
-    ctx.stroke();
-
-    var x = 700, y = 200;
-    drawCircle(ctx, x, y, 4, "#0F0");
-
-    window.onresize = function(e){
+    resizeCanvasToWindow();
+    drawGrid(80, 80);
+}
+function onEnter(e){
+    if(e.keyCode == 13){
+        document.getElementById("submit").click();
+    }
+}
+function onSubmit(){
+    connectToServer();
+}
+function resizeCanvasToWindow(){
         cvs.height = window.innerHeight;
         cvs.width = window.innerWidth;
-        drawGrid(80, 80);
-    };
 }
 
 function prerenderShip(option){
@@ -69,63 +66,8 @@ function prerenderShip(option){
 
     return scvs;
 }
-
-// when you press enter in the nickname input
-function onEnter(){
-    if(event.keyCode == 13){
-        document.getElementById("submit").click();
-    }
-}
-
-function connectToServer(){
-    nick = document.getElementById("nickname").value || "Player";
-    console.log('connecting to server');
-    socket.emit('nick', nick);
-}
-
-socket.on('ready', function(IDd){
-    ID = IDd;
-    // hides Splash
-    document.getElementById("Overlay").classList.add('hidden');
-
-    // bind keys
-    // Ant - this works - don't touch it <3
-    window.onkeydown = function(e) {
-        sendKey(e, true);
-    };
-    window.onkeyup = function(e) {
-        sendKey(e, false);
-    };
-
-    // window resize
-    window.onresize = function(e){
-        cvs.height = window.innerHeight;
-        cvs.width = window.innerWidth;
-        // redraw only happens when the server sends the info
-    };
-
-    console.log("started :D");
-});
-
-socket.on('map', function(x, crafts, asteroids, bullets, leaderboard){
-    draw(x, crafts, asteroids, bullets, leaderboard);
-});
-
-// Draw the convas
-// Called whenever info arrives from the server
-function draw(x, crafts, asteroids, bullets, leaderboard) {
-    ctx.font = "12px sans-serif";
-    ctx.textAlign = "center";
-    var originX = crafts[x].pos.x;
-    var originY = crafts[x].pos.y;
-
-    drawGrid(originX, originY);
-    drawThings(originX, originY, asteroids, drawAsteroid);
-    drawThings(originX, originY, crafts, drawCraft);
-    drawThings(originX, originY, bullets, drawBullet);
-}
-
 function drawGrid(x, y){
+    // TODO: tidy up drawGrid
     var gridSize = 160;
     var w = x - canvas.width/2
     var h = y - canvas.height/2;
@@ -190,15 +132,40 @@ function drawGrid(x, y){
         ctx.stroke();
     }
 }
+function draw(craftNumber, crafts, asteroids, bullets, leaderboard) {
+    ctx.font = "12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "white";
+    var originX = crafts[craftNumber][2];
+    var originY = crafts[craftNumber][3];
 
-function drawThings(x, y, things, drawMethod){
-    for(var i; i < things.length; i++){
-        var xPos = (things[i].pos.x - x) + cvs.width/2;
-        var yPos = (things[i].pos.y - y) + cvs.height/2;
+    drawGrid(originX, originY);
+    // drawThings(originX, originY, asteroids, drawAsteroid);
+    drawThings(originX, originY, crafts, "craft");
+    // drawThings(originX, originY, bullets, drawBullet);
+}
+function drawThings(x, y, things, thingType){
+    switch(thingType){
+        case "craft":
+            var drawMethod = drawCraft;
+            getX = 2; getY = 3;
+            break;
+        case "asteroid":
+            var drawMethod = drawAsteroid;
+            getX = 2; getY = 3;
+            break;
+        case "bullet":
+            var drawMethod = drawBullet;
+            getX = 1; getY = 2;
+            break;
+    };
+
+    for(var i=0; i < things.length; i++){
+        var xPos = (things[i][getX] - x) + cvs.width/2;
+        var yPos = (things[i][getY] - y) + cvs.height/2;
         drawMethod(xPos, yPos, things[i]);
     }
 }
-
 function drawAsteroid(x, y, asteroid){
     ctx.beginPath();
     ctx.arc(x, y, asteroid.radius, 0, 2*Math.PI);
@@ -208,20 +175,20 @@ function drawAsteroid(x, y, asteroid){
     ctx.strokeStyle = "aqua";
     ctx.stroke();
 }
-
 function drawCircle(contxt, x, y, radius, colour){
     contxt.beginPath();
     contxt.arc(x, y, radius, 0, 2*Math.PI);
     contxt.fillStyle = colour;
     contxt.fill();
 }
-
 function drawCraft(x, y, craft){
+    var nick = craft[0];
+    var rotation = craft[4];
     // draw nickname. styles for these are set in draw()
-    ctx.fillText(craft.nick, y + height/2 + 10, x);
+    ctx.fillText(nick, y + ship_ctx.height/2 + 10, x);
 
     ctx.translate(x, y);
-    ship_ctx.rotate(craft.rotation);
+    ctx.rotate(rotation);
     if (craft.powered){
         if (flameToggle){
             ctx.drawImage(shipo_cvs, -24, -27);
@@ -234,12 +201,47 @@ function drawCraft(x, y, craft){
     }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
-
 function drawBullet(x, y){
     drawCircle(ctx, x-2, y-2, 3, "#0F0");
 }
 
-// when a player dies
+function connectToServer(){
+    nick = document.getElementById("nickname").value || "Player";
+    console.log("connecting to server, " + nick);
+    socket.emit("nick", nick);
+}
+socket.on('map', function(craftNumber, crafts, asteroids, bullets, leaderboard){
+    var crafts_expanded = parse_condensed(crafts);
+    var asteroids_expanded = parse_condensed(asteroids);
+    var bullets_expanded = parse_condensed(bullets);
+    draw(craftNumber, crafts_expanded, asteroids_expanded, bullets_expanded, leaderboard);
+});
+function parse_condensed(items) {
+    r = items.split(';');
+    // remove last element (there is always an extra ';', so an extra element is made on split)
+    r.pop();
+
+    for (var i=0; i < r.length; i++) {
+        r[i] = r[i].split(',');
+    }
+
+    return r
+}
+socket.on('ready', function(IDd){
+    ID = IDd;
+    document.getElementById("Overlay").classList.add('hidden');
+
+    window.addEventListener("keydown", function(e) {
+        sendKey(e, true);
+    });
+    window.addEventListener("keydown", function(e) {
+        sendKey(e, false);
+    });
+
+    cvs.focus();
+
+    console.log("started :D");
+});
 socket.on('snuffed', function(IDd, position){
     if(IDd === ID){
         // load up nick choose again
