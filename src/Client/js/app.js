@@ -19,25 +19,6 @@ function init() {
     shipy_cvs = prerenderShip("yellow");
     ship_cvs = prerenderShip("none");
 
-    //temp
-    var x = 700, y = 300;
-    ctx.translate(x, y);
-    ctx.rotate(Math.PI*3/4);
-    ctx.drawImage(shipy_cvs, -24, -27);
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-    var x = 200, y = 200;
-    ctx.beginPath();
-    ctx.arc(x, y, 100, 0, 2*Math.PI);
-    ctx.fillStyle = "black";
-    ctx.fill();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "aqua";
-    ctx.stroke();
-
-    var x = 700, y = 200;
-    drawCircle(ctx, x, y, 4, "#0F0");
-
     window.onresize = function(e){
         cvs.height = window.innerHeight;
         cvs.width = window.innerWidth;
