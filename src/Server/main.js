@@ -27,9 +27,9 @@ function Craft(sock, id, birth){
     this.birthtime = birth;
     this.nick;
     this.ID = id;
-    this.acc = new Vector(0,0);
-    this.vel = new Vector(0,0);
-    this.pos = new Vector(5000, 6000);
+    this.acc = new Vector(0, 0);
+    this.vel = new Vector(0, 0);
+    this.pos = new Vector(0, 0);
     this.rotation = 0;
     this.radius = 22;
     this.dead = false;
@@ -41,19 +41,21 @@ function Craft(sock, id, birth){
 
     this.move = function(){
         if(this.firecooldown > 0) this.firecooldown--;
+        
         this.rotation += this.rotate;
 
         if(this.powered){
-            this.acc.x = Math.sin(this.rotation);
-            this.acc.y = -Math.cos(this.rotation);
-        }
+            this.acc.x = 2 * Math.sin(this.rotation);
+            this.acc.y = -2 * Math.cos(this.rotation);
+        }else this.acc.mult(0);
+        
         this.vel.translate(this.acc);
         if(this.breaking){
             this.vel.mult(0.9);
         }
         this.pos.translate(this.vel);
     };
-
+    // @Deprecated
     this.bounceMove = function(){
         this.vel.mult(1.5);
         this.pos.translate(this.vel);
@@ -335,14 +337,14 @@ io.sockets.on('connection', function(socket){
     socket.on('keys', function(key, on){
         switch(key){
             case 37: case 65: // left / A
-                craft.rotate += (on) ? -0.08 : 0.08;
+                craft.rotate = (on) ? -0.2 : 0;
                 //0.08 is multiplier set so far
                 break;
             case 38: case 87: // up / W
                 craft.powered = on;
                 break;
-            case 39: case 38: // right / D
-                craft.rotate += (on) ? 0.08 : -0.08;
+            case 39: case 68: // right / D
+                craft.rotate = (on) ? 0.2 : 0;
                 break;
             case 40: case 83: // down / S
                 craft.breaking = on;
