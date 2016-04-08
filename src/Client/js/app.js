@@ -204,17 +204,16 @@ socket.on("snuffed", function(IDd, position){
 var flags = [false, false, false, false, false];
 function sendKey(e, on){
     var fwatch = 0;
-    switch(e.keyCode){
-    // space, arrow keys, WASD
-    case 32:
+    switch(e.key){
+    case " ":
         fwatch++;
-    case 37: case 65:
+    case "ArrowLeft": case "a":
         fwatch++;
-    case 38: case 87:
+    case "ArrowUp": case "w":
         fwatch++;
-    case 39: case 68:
+    case "ArrowRight": case "d":
         fwatch++;
-    case 40: case 83:
+    case "ArrowDown": case "s":
         break;
     default:
         return;
@@ -222,10 +221,10 @@ function sendKey(e, on){
 
     if(!on){
         flags[fwatch] = false;
-        socket.emit("keys", e.keyCode, on);
+        socket.emit("keys", e.key, on);
     }else if(!flags[fwatch]){
         flags[fwatch] = true;
-        socket.emit("keys", e.keyCode, on);
+        socket.emit("keys", e.key, on);
     }
 }
 
