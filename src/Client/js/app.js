@@ -110,11 +110,12 @@ function drawThings(x, y, things, thingType){
         break;
     }
 
+    var xPos, yPos;
     for(var i=0; i < things.length; i++){
         for(var f = -10000; f <= 10000; f += 10000){
             for(var g = -10000; g <= 10000; g += 10000){
-                var xPos = things[i][0] - x + cvs.width/2 + f;
-                var yPos = things[i][1] - y + cvs.height/2 + g;
+                xPos = x - things[i][0] + cvs.width/2 + f;
+                yPos = y - things[i][1] + cvs.height/2 + g;
                 drawMethod(xPos, yPos, things[i]);
             }
         }
