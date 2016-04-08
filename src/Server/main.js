@@ -89,7 +89,7 @@ function Bullet(craft){
         this.pos.translate(this.vel);
         this.lifeLeft--;
     };
-    
+
     this.move();
     this.move();
 
@@ -290,9 +290,10 @@ function disposeOfDeadBodies(){
         else crafts[l] = crafts[r];
     }
 
-    for(var x = 0; x < crafts.length; x++) 
+    for(var x = 0; x < crafts.length; x++)
         for(var y = r + 1; y < crafts.length; y++)
-            crafts[x].socket.emit("snuffed", crafts[y].ID, crafts[y].pos);
+            crafts[x].socket.emit("snuffed", crafts[x].ID === crafts[y].ID,
+                    crafts[x].pos, crafts[y].pos);
 
     crafts = crafts.slice(0, r + 1);
     if(crafts.length === 0) stopSim();

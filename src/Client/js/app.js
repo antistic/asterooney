@@ -182,23 +182,47 @@ socket.on("ready", function(IDd){
 
     document.getElementById("Overlay").classList.add("hidden");
 
-    window.addEventListener("keydown", function(e) {
-        sendKey(e, true);
-    });
-    window.addEventListener("keyup", function(e) {
-        sendKey(e, false);
-    });
+    window.addEventListener("keydown", keydownHandler);
+    window.addEventListener("keyup", keyupHandler);
 
     cvs.focus();
 
     console.log("started :D");
 });
-socket.on("snuffed", function(IDd, position){
-    if(IDd === ID){
-        // load up nick choose again
+function keydownHandler(e) { sendKey(e, true); }
+function keyupHandler(e) { sendKey(e, false); }
+socket.on("snuffed", function(isMe, myPos, deadPos){
+    explosion(myPos.x - deadPos.x + cvs.width/2, myPos.y - deadPos.y + cvs.height/2, 0);
+    if(isMe){
+        ctx.fillStyle = "white";
+        ctx.font = "32pt Roboto";
+        ctx.fillText("YOU DIED.", cvs.width/2, cvs.height/2 - 70);
+        ctx.font = "20pt Roboto";
+        ctx.fillText("space to restart", cvs.width/2, cvs.height/2 + 70);
+        window.removeEventListener("keydown", keydownHandler);
+        window.removeEventListener("keyup", keyupHandler);
+        window.addEventListener("keyup", waitForRestart);
     }
-    // animate some explosion at the pos
 });
+function explosion(x, y, f){
+    drawCircle(ctx, x, y, f*2, "#FA0");
+    if (f != 20) {
+        window.requestAnimationFrame(function(){
+            explosion(x, y, f+1);
+        });
+    }
+}
+function waitForRestart(e){
+    // restarts on space
+    if (e.keyCode === 32) {
+        restart();
+    }
+}
+function restart(){
+    document.getElementById("Overlay").classList.remove("hidden");
+    window.removeEventListener("keyup", waitForRestart);
+    document.getElementById("submit").focus();
+}
 
 var flags = [false, false, false, false, false];
 function sendKey(e, on){
