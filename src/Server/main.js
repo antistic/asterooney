@@ -367,7 +367,7 @@ function sendShit(){
 
 initialSetUp();
 function initialSetUp(){
-    var numAsteroids = 20;
+    var numAsteroids = 0;
     for (var i = 0 ; i < numAsteroids ; i++){
         var newast = new Asteroid(Math.floor(Math.random() * 50) + 50);
         newast.pos = findStartingPoint(400);

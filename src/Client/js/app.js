@@ -80,14 +80,14 @@ function drawGrid(x, y){
 
     // grid
     ctx.strokeStyle = "#0BB";
-    for(var i = 0; i < (cvs.height/gridSize) + 1; i++){
+    for(var i = 0; i <= cvs.height/gridSize; i++){
         var pos = i*gridSize + 0.5 - offsetY;
         ctx.beginPath();
         ctx.moveTo(0, pos);
         ctx.lineTo(cvs.width, pos);
         ctx.stroke();
     }
-    for(var i = 0; i < (cvs.width/gridSize) + 1; i++){
+    for(var i = 0; i <= cvs.width/gridSize; i++){
         var pos = i*gridSize + 0.5 - offsetX;
         ctx.beginPath();
         ctx.moveTo(pos, 0);
@@ -140,12 +140,12 @@ function draw(craftNumber, crafts, asteroids, bullets, leaderboard) {
     var originY = crafts[craftNumber][3];
 
     drawGrid(originX, originY);
-    // drawThings(originX, originY, asteroids, drawAsteroid);
+    drawThings(originX, originY, asteroids, "asteroid");
+    drawThings(originX, originY, bullets, "bullet");
     drawThings(originX, originY, crafts, "craft");
-    // drawThings(originX, originY, bullets, drawBullet);
 }
 function drawThings(x, y, things, thingType){
-    var drawMethod;
+    var drawMethod, getX, getY;
     switch(thingType){
         case "craft":
             drawMethod = drawCraft;
@@ -160,7 +160,6 @@ function drawThings(x, y, things, thingType){
             getX = 1; getY = 2;
             break;
     };
-
     for(var i=0; i < things.length; i++){
         for(var f = -10000; f <= 10000; f += 10000){
             for(var g = -10000; g <= 10000; g += 10000){
@@ -222,15 +221,11 @@ socket.on('map', function(craftNumber, crafts, asteroids, bullets, leaderboard){
     draw(craftNumber, crafts_expanded, asteroids_expanded, bullets_expanded, leaderboard);
 });
 function parse_condensed(items) {
-    r = items.split(';');
+    var r = items.split(';');
     // remove last element (there is always an extra ';', so an extra element is made on split)
     r.pop();
-
-    for (var i=0; i < r.length; i++) {
-        r[i] = r[i].split(',');
-    }
-
-    return r
+    for (var i=0; i < r.length; i++) r[i] = r[i].split(',');
+    return r;
 }
 socket.on('ready', function(IDd){
     ID = IDd;
