@@ -1,6 +1,5 @@
 var cvs, ctx;
 var ship_cvs, shipo_cvs, shipy_cvs;
-var ship_ctx;
 var flameToggle = true;
 
 var socket = io("http://localhost:3000");
@@ -18,7 +17,6 @@ function init() {
     shipo_cvs = prerenderShip("orange");
     shipy_cvs = prerenderShip("yellow");
     ship_cvs = prerenderShip("none");
-    ship_ctx = ship_cvs.getContext("2d");
 
     window.addEventListener("resize", resizeCanvasToWindow, false);
     var submitButton = document.getElementById("submit");
