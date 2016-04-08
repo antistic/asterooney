@@ -27,37 +27,32 @@ function Craft(sock, id, birth){
     this.birthtime = birth;
     this.nick;
     this.ID = id;
-    this.acc = new Vector(0, 0);
-    this.vel = new Vector(0, 0);
-    this.pos = new Vector(0, 0);
-    this.rotation = 0;
+    this.vel = new Vector(0.0, 0.0);
+    this.pos = new Vector(0.0, 0.0);
+    this.rotation = 0.0;
     this.radius = 22;
     this.dead = false;
     this.powered = false;
     this.breaking = false;
-    this.rotate = 0;
+    this.rotate = 0.0;
     this.firing = false;
     this.firecooldown = 0;
 
     this.move = function(){
         if(this.firecooldown > 0) this.firecooldown--;
-        
         this.rotation += this.rotate;
-
         if(this.powered){
-            this.acc.x = 2 * Math.sin(this.rotation);
-            this.acc.y = -2 * Math.cos(this.rotation);
-        }else this.acc.mult(0);
-        
-        this.vel.translate(this.acc);
-        if(this.breaking){
-            this.vel.mult(0.9);
+            this.vel.x += Math.sin(this.rotation);
+            this.vel.y += -Math.cos(this.rotation);
+            var lim = 15;
+            if(this.vel.x > lim) this.vel.x = lim;
+            if(this.vel.y > lim) this.vel.y = lim;
+            if(this.vel.x < -lim) this.vel.x = -lim;
+            if(this.vel.y < -lim) this.vel.y = -lim;
         }
-        this.pos.translate(this.vel);
-    };
-    // @Deprecated
-    this.bounceMove = function(){
-        this.vel.mult(1.5);
+        if(this.breaking){
+            this.vel.mult(0.95);
+        }
         this.pos.translate(this.vel);
     };
 
@@ -73,7 +68,7 @@ function Craft(sock, id, birth){
         return this.nick +c+
                ID +c+
                parseInt(this.pos.x, 10) +c+
-               parseInt(this.pos.x, 10) +c+
+               parseInt(this.pos.y, 10) +c+
                this.rotation +c+
                (this.powered? 1 : 0);
     };
@@ -318,10 +313,10 @@ function stopSim(){
 }
 
 // When a client joins
-io.sockets.on('connection', function(socket){
+io.on('connection', function(socket){
 
     console.log("info : soc : connect");
-    craft = new Craft(socket, ID++);
+    var craft = new Craft(socket, ID++);
 
     socket.on('nick', function(nick){
         craft.nick = nick;
@@ -335,10 +330,10 @@ io.sockets.on('connection', function(socket){
     });
 
     socket.on('keys', function(key, on){
+        
         switch(key){
             case 37: case 65: // left / A
                 craft.rotate = (on) ? -0.2 : 0;
-                //0.08 is multiplier set so far
                 break;
             case 38: case 87: // up / W
                 craft.powered = on;

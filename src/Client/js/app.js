@@ -52,7 +52,7 @@ function prerenderShip(option){
     var y = 27;
     // fire
     if (option === "orange") {
-        drawCircle(sctx, x, y+9, 18, "#F90");
+        drawCircle(sctx, x, y+9, 18, "#F80");
     }
     if (option === "yellow") {
         drawCircle(sctx, x, y+9, 18, "#FF0");
@@ -67,7 +67,7 @@ function prerenderShip(option){
     return scvs;
 }
 function drawGrid(x, y){
-    // TODO: tidy up drawGrid
+    /*// TODO: tidy up drawGrid
     var gridSize = 100;
     var w = x - canvas.width/2
     var h = y - canvas.height/2;
@@ -131,6 +131,24 @@ function drawGrid(x, y){
         ctx.lineTo(canvas.width, hh);
         ctx.stroke();
     }
+    */
+    
+    ctx.fillStyle = "black";
+    ctx.fillRect(0,0, cvs.width, cvs.height);
+    ctx.strokeStyle = "#0BB";
+    
+    for(var f = x % 100; f < 9800; f += 100){
+        ctx.beginPath();
+        ctx.moveTo(f, 0);
+        ctx.lineTo(f, canvas.height);
+        ctx.stroke();
+    }
+    for(var f = y % 100; f < 9800; f += 100){
+        ctx.beginPath();
+        ctx.moveTo(0, f);
+        ctx.lineTo(canvas.width, f);
+        ctx.stroke();
+    }
 }
 function draw(craftNumber, crafts, asteroids, bullets, leaderboard) {
     ctx.font = "12px sans-serif";
@@ -192,14 +210,14 @@ function drawCraft(x, y, craft){
     ctx.fillText(nick, y + ship_ctx.height/2 + 10, x);
 
     ctx.translate(x, y);
-    ctx.rotate(rotation);
-    if (craft.powered){
-        if (flameToggle){
-            ctx.drawImage(shipo_cvs, -24, -27);
-        } else {
+    ctx.rotate(parseFloat(rotation) + 3.1416);
+    if (craft[5] === "1"){
+        if (flameToggle = !flameToggle){
             ctx.drawImage(shipy_cvs, -24, -27);
+        } else {
+            //ctx.drawImage(shipo_cvs, -24, -27);
+            ctx.drawImage(ship_cvs, -24, -27);
         }
-        flameToggle = !flameToggle;
     } else {
         ctx.drawImage(ship_cvs, -24, -27);
     }
@@ -229,12 +247,13 @@ function parse_condensed(items) {
 }
 socket.on('ready', function(IDd){
     ID = IDd;
+    
     document.getElementById("Overlay").classList.add('hidden');
 
     window.addEventListener("keydown", function(e) {
         sendKey(e, true);
     });
-    window.addEventListener("keydown", function(e) {
+    window.addEventListener("keyup", function(e) {
         sendKey(e, false);
     });
 
@@ -249,18 +268,31 @@ socket.on('snuffed', function(IDd, position){
     // animate some explosion at the pos
 });
 
+var flags = [false, false, false, false, false];
 function sendKey(e, on){
+    var fwatch = 0;
     switch(e.keyCode){
-        // space, arrow keys, WASD
-        case 32:
-        case 37: case 65:
-        case 38: case 87:
-        case 39: case 68:
-        case 40: case 83:
-            socket.emit('keys', e.keyCode, on);
-            break;
-        default:
-            break;
+    // space, arrow keys, WASD
+    case 32:
+        fwatch++;
+    case 37: case 65:
+        fwatch++;
+    case 38: case 87:
+        fwatch++;
+    case 39: case 68:
+        fwatch++;
+    case 40: case 83:
+        break;
+    default:
+        return;
+    }
+    
+    if(!on){
+        flags[fwatch] = false;
+        socket.emit('keys', e.keyCode, on);
+    }else if(!flags[fwatch]){
+        flags[fwatch] = true;
+        socket.emit('keys', e.keyCode, on);
     }
 }
 
