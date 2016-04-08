@@ -135,7 +135,8 @@ var asteroids = [];
 var bullets = [];
 
 // TODO: initialize these with dimensions of full field
-var totalHeight = totalWidth = 10000;
+var totalHeight = 10000;
+var totalWidth = 10000;
 
 // finds a free spot on the map and returns the vector
 function findStartingPoint(radius){
@@ -160,7 +161,7 @@ function validStartingPoint(x,y, radius){
 }
 
 function checkFor(objects, vec, radius){
-    for (var i = 0 ; i < objects.length ; i++) 
+    for (var i = 0 ; i < objects.length ; i++)
         if(distancesq(vec, objects[i].pos) < radius * radius) return false;
     return true;
 }
@@ -172,15 +173,16 @@ function doTick(){
 }
 
 function moveObjects(){
-    for(var x = 0; x < crafts.length; x++){
+    var x;
+    for(x = 0; x < crafts.length; x++){
         crafts[x].move();
         if(crafts[x].firing){
             crafts[x].firing = false;
             bullets.push(new Bullet(crafts[x]));
         }
     }
-    for(var x = 0; x < bullets.length; x++) bullets[x].move();
-    for(var x = 0; x < asteroids.length; x++) asteroids[x].move();
+    for(x = 0; x < bullets.length; x++) bullets[x].move();
+    for(x = 0; x < asteroids.length; x++) asteroids[x].move();
 }
 
 function boxObject(vec){
@@ -192,20 +194,20 @@ function boxObject(vec){
 
 // Hit everything
 function checkCollisions(){
-
-    for (var x = 0; x < crafts.length; x++) boxObject(crafts[x].pos);
-    for (var x = 0; x < asteroids.length; x++) boxObject(asteroids[x].pos);
-    for (var x = 0; x < bullets.length; x++) boxObject(bullets[x].pos);
+    var x, y;
+    for (x = 0; x < crafts.length; x++) boxObject(crafts[x].pos);
+    for (x = 0; x < asteroids.length; x++) boxObject(asteroids[x].pos);
+    for (x = 0; x < bullets.length; x++) boxObject(bullets[x].pos);
 
     // Asteroids against crafts
-    for(var x = 0; x < crafts.length; x++)
-        for(var y = 0; y < asteroids.length; y++)
+    for(x = 0; x < crafts.length; x++)
+        for(y = 0; y < asteroids.length; y++)
             if(isTouching(asteroids[y], crafts[x]))
                 crafts[x].dead = true;
 
     // Asteroids against asteroids
-    for(var x = 0; x < asteroids.length - 1; x++){
-        for(var y = x + 1; y < asteroids.length; y++){
+    for(x = 0; x < asteroids.length - 1; x++){
+        for(y = x + 1; y < asteroids.length; y++){
             if(isTouching(asteroids[x], asteroids[y])){
                 var a = asteroids[x];
                 var b = asteroids[y];
@@ -221,9 +223,9 @@ function checkCollisions(){
     }
 
     // Bullets against asteroids
-    for(var x = 0; x < bullets.length; x++){
+    for(x = 0; x < bullets.length; x++){
         if(!bullets[x].isAlive()) continue;
-        for(var y = 0; y < asteroids.length; y++){
+        for(y = 0; y < asteroids.length; y++){
             if(isTouching(asteroids[y], bullets[x])){
                 asteroids[y].vel.set(bullets[x].vel);
                 bullets[x].lifeLeft = 0;
@@ -232,9 +234,9 @@ function checkCollisions(){
     }
 
     // Bullets against bullets
-    for(var x = 0; x < bullets.length - 1; x++){
+    for(x = 0; x < bullets.length - 1; x++){
         if(!bullets[x].isAlive()) continue;
-        for(var y = x + 1; y < bullets.length; y++){
+        for(y = x + 1; y < bullets.length; y++){
             if(!bullets[y].isAlive()) continue;
             if(isTouching(bullets[x], bullets[y])){
                 bullets[x].lifeLeft = 0;
@@ -244,9 +246,9 @@ function checkCollisions(){
     }
 
     // Bullets against crafts
-    for(var x = 0; x < crafts.length; x++){
+    for(x = 0; x < crafts.length; x++){
         if(crafts[x].dead) continue;
-        for(var y = 0; y < bullets.length; y++){
+        for(y = 0; y < bullets.length; y++){
             if(!bullets[y].isAlive()) continue;
             if(isTouching(bullets[y], crafts[x])){
                 bullets[y].lifeLeft = 0;
@@ -256,9 +258,9 @@ function checkCollisions(){
     }
 
     // Crafts against crafts
-    for(var x = 0; x < crafts.length - 1; x++){
+    for(x = 0; x < crafts.length - 1; x++){
         if(crafts[x].dead) continue;
-        for(var y = x + 1; y < crafts.length; y++){
+        for(y = x + 1; y < crafts.length; y++){
             if(crafts[y].dead) continue;
             if(isTouching(crafts[x], crafts[y])){
                 crafts[x].dead = true;
@@ -269,7 +271,6 @@ function checkCollisions(){
 }
 
 function disposeOfDeadBodies(){
-
     var r = bullets.length;
     var l = 0;
     for(r = bullets.length - 1; r >= 0; r--){
@@ -288,7 +289,7 @@ function disposeOfDeadBodies(){
         if(l === r) break;
         else crafts[l] = crafts[r];
     }
-    
+
     for(var x = 0; x < crafts.length; x++) 
         for(var y = r + 1; y < crafts.length; y++)
             crafts[x].socket.emit("snuffed", crafts[y].ID, crafts[y].pos);
@@ -317,7 +318,6 @@ function stopSim(){
 
 // When a client joins
 io.on("connection", function(socket){
-
     console.log("info : soc : connect");
     var craft = new Craft(socket, ID++);
 
@@ -332,7 +332,6 @@ io.on("connection", function(socket){
     });
 
     socket.on("keys", function(key, on){
-        
         switch(key){
         case 37: case 65: // left / A
             craft.rotate = (on) ? -0.2 : 0;
@@ -354,12 +353,13 @@ io.on("connection", function(socket){
 
 function sendShit(){
     var craftsC = "", asteroidsC  = "", bulletsC = "", leaderboard = "";
-    for(var x = 0; x < crafts.length; x++) craftsC += crafts[x].getCondensed() + ";";
-    for(var x = 0; x < asteroids.length; x++) asteroidsC += asteroids[x].getCondensed() + ";";
-    for(var x = 0; x < bullets.length; x++) bulletsC += bullets[x].getCondensed() + ";";
+    var x;
+    for(x = 0; x < crafts.length; x++) craftsC += crafts[x].getCondensed() + ";";
+    for(x = 0; x < asteroids.length; x++) asteroidsC += asteroids[x].getCondensed() + ";";
+    for(x = 0; x < bullets.length; x++) bulletsC += bullets[x].getCondensed() + ";";
     crafts.sort(function(a, b){ return a.birth - b.birth; });
-    for(var x = 0; x < 10 && x < crafts.length; x++) leaderboard += crafts[x].nick + ";";
-    for(var x = 0; x < crafts.length; x++)
+    for(x = 0; x < 10 && x < crafts.length; x++) leaderboard += crafts[x].nick + ";";
+    for(x = 0; x < crafts.length; x++)
         crafts[x].socket.emit("map", x, craftsC, asteroidsC, bulletsC, leaderboard);
 }
 
