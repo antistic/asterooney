@@ -71,16 +71,16 @@ function drawGrid(x, y){
     ctx.lineWidth = 1;
     ctx.fillRect(0,0, cvs.width, cvs.height);
     ctx.strokeStyle = "#0BB";
-    for(var f = x % 160; f < canvas.width; f += 160){
+    for(var f = x % 160; f < cvs.width; f += 160){
         ctx.beginPath();
         ctx.moveTo(f, 0);
-        ctx.lineTo(f, canvas.height);
+        ctx.lineTo(f, cvs.height);
         ctx.stroke();
     }
-    for(var f = y % 160; f < canvas.height; f += 160){
+    for(var f = y % 160; f < cvs.height; f += 160){
         ctx.beginPath();
         ctx.moveTo(0, f);
-        ctx.lineTo(canvas.width, f);
+        ctx.lineTo(cvs.width, f);
         ctx.stroke();
     }
 }
