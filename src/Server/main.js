@@ -1,13 +1,13 @@
-var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var app = require("express")();
+var http = require("http").Server(app);
+var io = require("socket.io")(http);
 
-app.get('/', function(req, res){
-    res.send('Server\'s alive');
+app.get("/", function(req, res){
+    res.send("Server\'s alive");
 });
 
 http.listen(3000, function(){
-    console.log('info : ini : start on 3000');
+    console.log("info : ini : start on 3000");
 });
 
 var ID = 0;
@@ -22,7 +22,7 @@ function Vector(myX, myY){
     };
     this.set = function(v){
         this.x = v.x; this.y = v.y;
-    }
+    };
 }
 
 function Craft(socket, ID){
@@ -209,7 +209,7 @@ function checkCollisions(){
             if(isTouching(asteroids[x], asteroids[y])){
                 var a = asteroids[x];
                 var b = asteroids[y];
-                console.log("game : ast : collision")
+                console.log("game : ast : collision");
                 a.vel.x = (a.vel.x * (a.radiussq - b.radiussq) + (2 * b.radiussq * b.vel.x)) / 2;
                 a.vel.y = (a.vel.y * (a.radiussq - b.radiussq) + (2 * b.radiussq * b.vel.y)) / 2;
                 b.vel.x = (b.vel.x * (b.radiussq - a.radiussq) + (2 * a.radiussq * a.vel.x)) / 2;
@@ -231,7 +231,7 @@ function checkCollisions(){
         }
     }
 
-    //Bullets against bullets
+    // Bullets against bullets
     for(var x = 0; x < bullets.length - 1; x++){
         if(!bullets[x].isAlive()) continue;
         for(var y = x + 1; y < bullets.length; y++){
@@ -291,7 +291,7 @@ function disposeOfDeadBodies(){
     
     for(var x = 0; x < crafts.length; x++) 
         for(var y = r + 1; y < crafts.length; y++)
-            crafts[x].socket.emit('snuffed', crafts[y].ID, crafts[y].pos);
+            crafts[x].socket.emit("snuffed", crafts[y].ID, crafts[y].pos);
 
     crafts = crafts.slice(0, r + 1);
     if(crafts.length === 0) stopSim();
@@ -302,7 +302,7 @@ var running = false;
 
 function startSim(){
     running = true;
-    console.log('info : sim : start');
+    console.log("info : sim : start");
     simulator = setInterval(function(){
         doTick();
         sendShit();
@@ -312,42 +312,42 @@ function startSim(){
 function stopSim(){
     running = false;
     clearInterval(simulator);
-    console.log('info : sim : stop'); // for the trees mate
+    console.log("info : sim : stop"); // for the trees mate
 }
 
 // When a client joins
-io.on('connection', function(socket){
+io.on("connection", function(socket){
 
     console.log("info : soc : connect");
     var craft = new Craft(socket, ID++);
 
-    socket.on('nick', function(nick){
+    socket.on("nick", function(nick){
         craft.nick = nick;
         craft.birthtime = Date.now();
         console.log("info : soc : " + nick + " joined");
         craft.pos = findStartingPoint(100);
         crafts.push(craft);
         if(!running) startSim();
-        io.emit('ready', craft.ID);
+        io.emit("ready", craft.ID);
     });
 
-    socket.on('keys', function(key, on){
+    socket.on("keys", function(key, on){
         
         switch(key){
-            case 37: case 65: // left / A
-                craft.rotate = (on) ? -0.2 : 0;
-                break;
-            case 38: case 87: // up / W
-                craft.powered = on;
-                break;
-            case 39: case 68: // right / D
-                craft.rotate = (on) ? 0.2 : 0;
-                break;
-            case 40: case 83: // down / S
-                craft.breaking = on;
-                break;
-            case 32:    // spacebar
-                if(on) craft.tryFiring();
+        case 37: case 65: // left / A
+            craft.rotate = (on) ? -0.2 : 0;
+            break;
+        case 38: case 87: // up / W
+            craft.powered = on;
+            break;
+        case 39: case 68: // right / D
+            craft.rotate = (on) ? 0.2 : 0;
+            break;
+        case 40: case 83: // down / S
+            craft.breaking = on;
+            break;
+        case 32:    // spacebar
+            if(on) craft.tryFiring();
         }
     });
 });
@@ -360,7 +360,7 @@ function sendShit(){
     crafts.sort(function(a, b){ return a.birth - b.birth; });
     for(var x = 0; x < 10 && x < crafts.length; x++) leaderboard += crafts[x].nick + ";";
     for(var x = 0; x < crafts.length; x++)
-        crafts[x].socket.emit('map', x, craftsC, asteroidsC, bulletsC, leaderboard);
+        crafts[x].socket.emit("map", x, craftsC, asteroidsC, bulletsC, leaderboard);
 }
 
 initialSetUp();

@@ -3,7 +3,7 @@ var ship_cvs, shipo_cvs, shipy_cvs;
 var ship_ctx;
 var flameToggle = true;
 
-var socket = io('http://localhost:3000');
+var socket = io("http://localhost:3000");
 var nick, ID;
 
 // initialise stuff
@@ -38,8 +38,8 @@ function onSubmit(){
     connectToServer();
 }
 function resizeCanvasToWindow(){
-        cvs.height = window.innerHeight;
-        cvs.width = window.innerWidth;
+    cvs.height = window.innerHeight;
+    cvs.width = window.innerWidth;
 }
 
 function prerenderShip(option){
@@ -97,18 +97,19 @@ function draw(craftNumber, crafts, asteroids, bullets, leaderboard) {
     drawThings(originX, originY, crafts, "craft");
 }
 function drawThings(x, y, things, thingType){
-    var drawMethod, getX, getY;
+    var drawMethod;
     switch(thingType){
-        case "craft":
-            drawMethod = drawCraft;
-            break;
-        case "asteroid":
-            drawMethod = drawAsteroid;
-            break;
-        case "bullet":
-            drawMethod = drawBullet;
-            break;
-    };
+    case "craft":
+        drawMethod = drawCraft;
+        break;
+    case "asteroid":
+        drawMethod = drawAsteroid;
+        break;
+    case "bullet":
+        drawMethod = drawBullet;
+        break;
+    }
+
     for(var i=0; i < things.length; i++){
         for(var f = -10000; f <= 10000; f += 10000){
             for(var g = -10000; g <= 10000; g += 10000){
@@ -163,23 +164,23 @@ function connectToServer(){
     console.log("connecting to server, " + nick);
     socket.emit("nick", nick);
 }
-socket.on('map', function(craftNumber, crafts, asteroids, bullets, leaderboard){
+socket.on("map", function(craftNumber, crafts, asteroids, bullets, leaderboard){
     var crafts_expanded = parse_condensed(crafts);
     var asteroids_expanded = parse_condensed(asteroids);
     var bullets_expanded = parse_condensed(bullets);
     draw(craftNumber, crafts_expanded, asteroids_expanded, bullets_expanded, leaderboard);
 });
 function parse_condensed(items) {
-    var r = items.split(';');
+    var r = items.split(";");
     // remove last element (there is always an extra ';', so an extra element is made on split)
     r.pop();
-    for (var i=0; i < r.length; i++) r[i] = r[i].split(',');
+    for (var i=0; i < r.length; i++) r[i] = r[i].split(",");
     return r;
 }
-socket.on('ready', function(IDd){
+socket.on("ready", function(IDd){
     ID = IDd;
-    
-    document.getElementById("Overlay").classList.add('hidden');
+
+    document.getElementById("Overlay").classList.add("hidden");
 
     window.addEventListener("keydown", function(e) {
         sendKey(e, true);
@@ -192,7 +193,7 @@ socket.on('ready', function(IDd){
 
     console.log("started :D");
 });
-socket.on('snuffed', function(IDd, position){
+socket.on("snuffed", function(IDd, position){
     if(IDd === ID){
         // load up nick choose again
     }
@@ -217,13 +218,13 @@ function sendKey(e, on){
     default:
         return;
     }
-    
+
     if(!on){
         flags[fwatch] = false;
-        socket.emit('keys', e.keyCode, on);
+        socket.emit("keys", e.keyCode, on);
     }else if(!flags[fwatch]){
         flags[fwatch] = true;
-        socket.emit('keys', e.keyCode, on);
+        socket.emit("keys", e.keyCode, on);
     }
 }
 
