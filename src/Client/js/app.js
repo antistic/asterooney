@@ -85,15 +85,15 @@ function drawGrid(x, y){
     }
 }
 function draw(craftNumber, crafts, asteroids, bullets, leaderboard) {
-    ctx.font = "12px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillStyle = "white";
     var playerX = crafts[craftNumber][0];
     var playerY = crafts[craftNumber][1];
 
     drawGrid(playerX, playerY);
     drawThings(playerX, playerY, asteroids, "asteroid");
     drawThings(playerX, playerY, bullets, "bullet");
+    ctx.font = "12pt Roboto";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "white";
     drawThings(playerX, playerY, crafts, "craft");
 }
 function drawThings(x, y, things, thingType){
@@ -139,8 +139,7 @@ function drawCircle(contxt, x, y, radius, colour){
 function drawCraft(x, y, craft){
     var nick = craft[2];
     var rotation = craft[4];
-    // draw nickname. styles for these are set in draw()
-    ctx.fillText(nick, y + ship_ctx.height/2 + 10, x);
+    ctx.fillText(nick, x, y - 40);
 
     ctx.translate(x, y);
     ctx.rotate(parseFloat(rotation) + 3.1416);
