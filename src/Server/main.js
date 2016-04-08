@@ -333,19 +333,19 @@ io.on("connection", function(socket){
 
     socket.on("keys", function(key, on){
         switch(key){
-        case "ArrowLeft": case "a":
+        case 37: case 65: // left / A
             craft.rotate = (on) ? -0.2 : 0;
             break;
-        case "ArrowUp": case "w":
+        case 38: case 87: // up / W
             craft.powered = on;
             break;
-        case "ArrowRight": case "d":
+        case 39: case 68: // right / D
             craft.rotate = (on) ? 0.2 : 0;
             break;
-        case "ArrowDown": case "s":
+        case 40: case 83: // down / S
             craft.breaking = on;
             break;
-        case " ":
+        case 32:    // spacebar
             if(on) craft.tryFiring();
         }
     });
