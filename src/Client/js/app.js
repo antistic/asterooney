@@ -88,13 +88,13 @@ function draw(craftNumber, crafts, asteroids, bullets, leaderboard) {
     ctx.font = "12px sans-serif";
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
-    var originX = crafts[craftNumber][0];
-    var originY = crafts[craftNumber][1];
+    var playerX = crafts[craftNumber][0];
+    var playerY = crafts[craftNumber][1];
 
-    drawGrid(originX, originY);
-    drawThings(originX, originY, asteroids, "asteroid");
-    drawThings(originX, originY, bullets, "bullet");
-    drawThings(originX, originY, crafts, "craft");
+    drawGrid(playerX, playerY);
+    drawThings(playerX, playerY, asteroids, "asteroid");
+    drawThings(playerX, playerY, bullets, "bullet");
+    drawThings(playerX, playerY, crafts, "craft");
 }
 function drawThings(x, y, things, thingType){
     var drawMethod;
