@@ -20,13 +20,16 @@ function Vector(myX, myY){
     this.mult = function(m){
         this.x *= m; this.y *= m;
     };
+    this.set = function(v){
+        this.x = v.x; this.y = v.y;
+    }
 }
 
-function Craft(sock, id, birth){
-    this.socket = sock;
-    this.birthtime = birth;
+function Craft(socket, ID){
+    this.socket = socket;
+    this.birthtime;
     this.nick;
-    this.ID = id;
+    this.ID = ID;
     this.vel = new Vector(0.0, 0.0);
     this.pos = new Vector(0.0, 0.0);
     this.rotation = 0.0;
@@ -65,18 +68,19 @@ function Craft(sock, id, birth){
 
     this.getCondensed = function(){
         var c = ",";
-        return this.nick +c+
-               ID +c+
-               parseInt(this.pos.x, 10) +c+
+        return parseInt(this.pos.x, 10) +c+
                parseInt(this.pos.y, 10) +c+
+               this.nick +c+
+               this.ID +c+
                this.rotation +c+
                (this.powered? 1 : 0);
     };
 }
 
 function Bullet(craft){
-    this.vel = new Vector(Math.sin(craft.rotation) * 17 + craft.vel.x, 
-                          -Math.cos(craft.rotation) * 17 + craft.vel.y);
+    var rot = craft.rotation + Math.PI;
+    this.vel = new Vector(Math.sin(rot) * 17, -Math.cos(rot) * 17);
+    this.vel.translate(craft.vel);
     this.pos = new Vector(craft.pos.x, craft.pos.y);
     this.lifeLeft = 160;
     this.radius = 3;   // rad is 3 for client side drawing (y)
@@ -102,7 +106,7 @@ function Bullet(craft){
 function Asteroid(rad){
     this.vel = new Vector(0,0);
     this.radius = rad;
-    this.pos = new Vector(5000, 5000);
+    this.pos;
 
     this.move = function(){
         this.vel.mult(0.997);
@@ -110,9 +114,7 @@ function Asteroid(rad){
     };
 
     this.getCondensed = function(){
-        return parseInt(this.pos.x, 10) + "," +
-               parseInt(this.pos.y, 10) + "," +
-               rad;
+        return parseInt(this.pos.x, 10) + "," + parseInt(this.pos.y, 10) + "," + rad;
     };
 }
 
@@ -207,6 +209,7 @@ function checkCollisions(){
             if(isTouching(asteroids[x], asteroids[y])){
                 var a = asteroids[x];
                 var b = asteroids[y];
+                console.log("game : ast : collision")
                 a.vel.x = (a.vel.x * (a.radiussq - b.radiussq) + (2 * b.radiussq * b.vel.x)) / 2;
                 a.vel.y = (a.vel.y * (a.radiussq - b.radiussq) + (2 * b.radiussq * b.vel.y)) / 2;
                 b.vel.x = (b.vel.x * (b.radiussq - a.radiussq) + (2 * a.radiussq * a.vel.x)) / 2;
@@ -228,7 +231,7 @@ function checkCollisions(){
         }
     }
 
-    // Bullets against bullets
+    //Bullets against bullets
     for(var x = 0; x < bullets.length - 1; x++){
         if(!bullets[x].isAlive()) continue;
         for(var y = x + 1; y < bullets.length; y++){
@@ -320,10 +323,9 @@ io.on('connection', function(socket){
 
     socket.on('nick', function(nick){
         craft.nick = nick;
-        craft.birth = Date.now();
+        craft.birthtime = Date.now();
         console.log("info : soc : " + nick + " joined");
         craft.pos = findStartingPoint(100);
-        //findStartingPoint(craft);
         crafts.push(craft);
         if(!running) startSim();
         io.emit('ready', craft.ID);
@@ -357,14 +359,13 @@ function sendShit(){
     for(var x = 0; x < bullets.length; x++) bulletsC += bullets[x].getCondensed() + ";";
     crafts.sort(function(a, b){ return a.birth - b.birth; });
     for(var x = 0; x < 10 && x < crafts.length; x++) leaderboard += crafts[x].nick + ";";
-
     for(var x = 0; x < crafts.length; x++)
         crafts[x].socket.emit('map', x, craftsC, asteroidsC, bulletsC, leaderboard);
 }
 
 initialSetUp();
 function initialSetUp(){
-    var numAsteroids = 0;
+    var numAsteroids = 20;
     for (var i = 0 ; i < numAsteroids ; i++){
         var newast = new Asteroid(Math.floor(Math.random() * 50) + 50);
         newast.pos = findStartingPoint(400);

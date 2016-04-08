@@ -67,83 +67,17 @@ function prerenderShip(option){
     return scvs;
 }
 function drawGrid(x, y){
-    /*// TODO: tidy up drawGrid
-    var gridSize = 100;
-    var w = x - canvas.width/2
-    var h = y - canvas.height/2;
-    var offsetX = w % gridSize;
-    var offsetY = h % gridSize;
-
-    // background
     ctx.fillStyle = "black";
-    ctx.fillRect(0,0, cvs.width, cvs.height);
-
-    // grid
-    ctx.strokeStyle = "#0BB";
-    for(var i = 0; i <= cvs.height/gridSize; i++){
-        var pos = i*gridSize + 0.5 - offsetY;
-        ctx.beginPath();
-        ctx.moveTo(0, pos);
-        ctx.lineTo(cvs.width, pos);
-        ctx.stroke();
-    }
-    for(var i = 0; i <= cvs.width/gridSize; i++){
-        var pos = i*gridSize + 0.5 - offsetX;
-        ctx.beginPath();
-        ctx.moveTo(pos, 0);
-        ctx.lineTo(pos, cvs.height);
-        ctx.stroke();
-    }
-
-    // block out anything outside the grid
-    // less than
-    ctx.lineWidth = 3;
-    if (w < 0) {
-        var ww = -w;
-        ctx.fillRect(0,0, ww, canvas.height);
-        ctx.beginPath();
-        ctx.moveTo(ww, 0);
-        ctx.lineTo(ww, canvas.height);
-        ctx.stroke();
-    }
-    if (h < 0) {
-        h = -h;
-        ctx.fillRect(0,0, canvas.width, h);
-        ctx.beginPath();
-        ctx.moveTo(0, h);
-        ctx.lineTo(canvas.width, h);
-        ctx.stroke();
-    }
-    // right & bottom of grid
-    if (x + canvas.width/2 > 1000){
-        var ww = 1000 - x + canvas.width/2;
-        ctx.fillRect(ww, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-        ctx.moveTo(ww, 0);
-        ctx.lineTo(ww, canvas.height);
-        ctx.stroke();
-    }
-    if (y + canvas.height/2 > 1000){
-        var hh = 1000 - y + canvas.height/2;
-        ctx.fillRect(0, hh, canvas.width, canvas.height);
-        ctx.beginPath();
-        ctx.moveTo(0, hh);
-        ctx.lineTo(canvas.width, hh);
-        ctx.stroke();
-    }
-    */
-    
-    ctx.fillStyle = "black";
+    ctx.lineWidth = 1;
     ctx.fillRect(0,0, cvs.width, cvs.height);
     ctx.strokeStyle = "#0BB";
-    
-    for(var f = x % 100; f < 9800; f += 100){
+    for(var f = x % 160; f < canvas.width; f += 160){
         ctx.beginPath();
         ctx.moveTo(f, 0);
         ctx.lineTo(f, canvas.height);
         ctx.stroke();
     }
-    for(var f = y % 100; f < 9800; f += 100){
+    for(var f = y % 160; f < canvas.height; f += 160){
         ctx.beginPath();
         ctx.moveTo(0, f);
         ctx.lineTo(canvas.width, f);
@@ -154,8 +88,8 @@ function draw(craftNumber, crafts, asteroids, bullets, leaderboard) {
     ctx.font = "12px sans-serif";
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
-    var originX = crafts[craftNumber][2];
-    var originY = crafts[craftNumber][3];
+    var originX = crafts[craftNumber][0];
+    var originY = crafts[craftNumber][1];
 
     drawGrid(originX, originY);
     drawThings(originX, originY, asteroids, "asteroid");
@@ -167,22 +101,19 @@ function drawThings(x, y, things, thingType){
     switch(thingType){
         case "craft":
             drawMethod = drawCraft;
-            getX = 2; getY = 3;
             break;
         case "asteroid":
             drawMethod = drawAsteroid;
-            getX = 2; getY = 3;
             break;
         case "bullet":
             drawMethod = drawBullet;
-            getX = 1; getY = 2;
             break;
     };
     for(var i=0; i < things.length; i++){
         for(var f = -10000; f <= 10000; f += 10000){
             for(var g = -10000; g <= 10000; g += 10000){
-                var xPos = (things[i][getX] - x) + cvs.width/2 + f;
-                var yPos = (things[i][getY] - y) + cvs.height/2 + g;
+                var xPos = things[i][0] - x + cvs.width/2 + f;
+                var yPos = things[i][1] - y + cvs.height/2 + g;
                 drawMethod(xPos, yPos, things[i]);
             }
         }
@@ -190,7 +121,7 @@ function drawThings(x, y, things, thingType){
 }
 function drawAsteroid(x, y, asteroid){
     ctx.beginPath();
-    ctx.arc(x, y, asteroid.radius, 0, 2*Math.PI);
+    ctx.arc(x, y, asteroid[2], 0, 2*Math.PI);
     ctx.fillStyle = "black";
     ctx.fill();
     ctx.lineWidth = 3;
@@ -204,7 +135,7 @@ function drawCircle(contxt, x, y, radius, colour){
     contxt.fill();
 }
 function drawCraft(x, y, craft){
-    var nick = craft[0];
+    var nick = craft[2];
     var rotation = craft[4];
     // draw nickname. styles for these are set in draw()
     ctx.fillText(nick, y + ship_ctx.height/2 + 10, x);
@@ -224,7 +155,7 @@ function drawCraft(x, y, craft){
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 function drawBullet(x, y){
-    drawCircle(ctx, x-2, y-2, 3, "#0F0");
+    drawCircle(ctx, x-2, y-2, 3, "#F00");
 }
 
 function connectToServer(){
