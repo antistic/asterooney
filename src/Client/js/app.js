@@ -143,12 +143,12 @@ function drawCraft(x, y, craft){
     ctx.translate(x, y);
     ctx.rotate(parseFloat(rotation) + 3.1416);
     if (craft[5] === "1"){
-        if (flameToggle = !flameToggle){
+        if (flameToggle){
             ctx.drawImage(shipy_cvs, -24, -27);
         } else {
-            //ctx.drawImage(shipo_cvs, -24, -27);
-            ctx.drawImage(ship_cvs, -24, -27);
+            ctx.drawImage(shipo_cvs, -24, -27);
         }
+        flameToggle = !flameToggle;
     } else {
         ctx.drawImage(ship_cvs, -24, -27);
     }
