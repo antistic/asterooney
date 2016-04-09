@@ -244,7 +244,8 @@ function checkCollisions(){
         if(!bullets[x].isAlive()) continue;
         for(y = 0; y < asteroids.length; y++){
             if(isTouching(asteroids[y], bullets[x])){
-                asteroids[y].vel.set(bullets[x].vel);
+                asteroids[y].vel.set(bullets[x].vel)
+                    .mult(0.8 - 0.002 * asteroids[y].radius);
                 bullets[x].lifeLeft = 0;
             }
         }
