@@ -10,8 +10,6 @@ http.listen(3000, function(){
     console.log("info : ini : start on 3000");
 });
 
-var ID = 0;
-
 function Vector(myX, myY){
     this.x = myX; this.y = myY;
     this.translate = function(vec){
@@ -25,11 +23,10 @@ function Vector(myX, myY){
     };
 }
 
-function Craft(socket, ID){
+function Craft(socket, nick, birthtime){
     this.socket = socket;
-    this.birthtime;
-    this.nick;
-    this.ID = ID;
+    this.birthtime = birthtime;
+    this.nick = nick;
     this.vel = new Vector(0.0, 0.0);
     this.pos = new Vector(0.0, 0.0);
     this.rotation = 0.0;
@@ -71,7 +68,6 @@ function Craft(socket, ID){
         return parseInt(this.pos.x, 10) +c+
                parseInt(this.pos.y, 10) +c+
                this.nick +c+
-               this.ID +c+
                this.rotation +c+
                (this.powered? 1 : 0);
     };
@@ -320,11 +316,10 @@ function stopSim(){
 // When a client joins
 io.on("connection", function(socket){
     console.log("info : soc : connect");
-    var craft = new Craft(socket, ID++);
+    var craft;
 
     socket.on("nick", function(nick){
-        craft.nick = nick;
-        craft.birthtime = Date.now();
+        craft = new Craft(socket, nick, Date.now());
         console.log("info : soc : " + nick + " joined");
         craft.pos = findStartingPoint(100);
         crafts.push(craft);
