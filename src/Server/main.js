@@ -112,11 +112,10 @@ function Asteroid(rad){
 }
 
 function intersectsRectangle(a, b){
-    var A = {x1: a.pos.x - a.radius, y1: a.pos.y - a.radius,
-             x2: a.pos.x + a.radius, y2: a.pos.y + a.radius};
-    var B = {x1: b.pos.x - b.radius, y1: b.pos.y - b.radius,
-             x2: b.pos.x + b.radius, y2: b.pos.y + b.radius};
-    return A.x1 < B.x2 && A.x2 > B.x1 && A.y1 < B.y2 && A.y2 > B.y1;
+    return a.pos.x - a.radius < b.pos.x + b.radius
+        && a.pos.x + a.radius > b.pos.x - b.radius
+        && a.pos.y - a.radius < b.pos.y + b.radius
+        && a.pos.y + a.radius > b.pos.y - b.radius;
 }
 
 function distancesq(p1, p2){
