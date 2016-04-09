@@ -14,12 +14,15 @@ function Vector(myX, myY){
     this.x = myX; this.y = myY;
     this.translate = function(vec){
         this.x += vec.x; this.y += vec.y;
+        return this;
     };
     this.mult = function(m){
         this.x *= m; this.y *= m;
+        return this;
     };
     this.set = function(v){
         this.x = v.x; this.y = v.y;
+        return this;
     };
 }
 
@@ -27,14 +30,14 @@ function Craft(socket, nick, birthtime){
     this.socket = socket;
     this.birthtime = birthtime;
     this.nick = nick;
-    this.vel = new Vector(0.0, 0.0);
-    this.pos = new Vector(0.0, 0.0);
-    this.rotation = 0.0;
+    this.vel = new Vector(0, 0);
+    this.pos = new Vector(0, 0);
+    this.rotation = 0;
     this.radius = 22;
     this.dead = false;
     this.powered = false;
     this.breaking = false;
-    this.rotate = 0.0;
+    this.rotate = 0;
     this.firing = false;
     this.firecooldown = 0;
 
@@ -51,7 +54,7 @@ function Craft(socket, nick, birthtime){
             if(this.vel.y < -lim) this.vel.y = -lim;
         }
         if(this.breaking){
-            this.vel.mult(0.95);
+            this.vel.mult(0.9);
         }
         this.pos.translate(this.vel);
     };
@@ -74,10 +77,10 @@ function Craft(socket, nick, birthtime){
 }
 
 function Bullet(craft){
-    var rot = craft.rotation + Math.PI;
-    this.vel = new Vector(Math.sin(rot) * 17, -Math.cos(rot) * 17);
-    this.vel.translate(craft.vel);
-    this.pos = new Vector(craft.pos.x, craft.pos.y);
+    var csin = Math.sin(craft.rotation);
+    var ccos = -Math.cos(craft.rotation);
+    this.vel = new Vector(csin, ccos).mult(25).translate(craft.vel);
+    this.pos = new Vector(csin, ccos).mult(25).translate(craft.pos);
     this.lifeLeft = 160;
     this.radius = 3;   // rad is 3 for client side drawing (y)
 
@@ -85,9 +88,6 @@ function Bullet(craft){
         this.pos.translate(this.vel);
         this.lifeLeft--;
     };
-
-    this.move();
-    this.move();
 
     this.isAlive = function(){
         return this.lifeLeft > 0;
@@ -105,13 +105,21 @@ function Asteroid(rad){
     this.pos;
 
     this.move = function(){
-        this.vel.mult(0.997);
+        this.vel.mult(0.99);
         this.pos.translate(this.vel);
     };
 
     this.getCondensed = function(){
         return parseInt(this.pos.x, 10) + "," + parseInt(this.pos.y, 10) + "," + rad;
     };
+}
+
+function intersectsRectangle(a, b){
+    var A = {x1: a.pos.x - a.radius, y1: a.pos.y - a.radius,
+             x2: a.pos.x + a.radius, y2: a.pos.y + a.radius};
+    var B = {x1: b.pos.x - b.radius, y1: b.pos.y - b.radius,
+             x2: b.pos.x + b.radius, y2: b.pos.y + b.radius};
+    return A.x1 < B.x2 && A.x2 > B.x1 && A.y1 < B.y2 && A.y2 > B.y1;
 }
 
 function distancesq(p1, p2){
@@ -121,7 +129,8 @@ function distancesq(p1, p2){
 }
 
 function isTouching(a, b){
-    return distancesq(a.pos, b.pos) < (a.radius + b.radius)*(a.radius + b.radius);
+    return intersectsRectangle(a, b)
+            && distancesq(a.pos, b.pos) < (a.radius + b.radius)*(a.radius + b.radius);
 }
 
 // Ticking
@@ -135,18 +144,21 @@ var totalHeight = 10000;
 var totalWidth = 10000;
 
 // finds a free spot on the map and returns the vector
-function findStartingPoint(radius){
+function findStartingPoint(block, radius){
     // Randomly choose coordinates until you find
     // a pair that is not within a certain radius
     // of anything else
     var x = Math.floor(Math.random()*totalWidth);
     var y = Math.floor(Math.random()*totalHeight);
 
-    while (!validStartingPoint(x, y, radius)) {
+    var maxTry = 1000;
+    
+    while ((!block || maxTry-- > 0) && !validStartingPoint(x, y, radius)) {
         x = Math.floor(Math.random()*totalWidth);
         y = Math.floor(Math.random()*totalHeight);
     }
-    return new Vector(x,y);
+    if(maxTry === 0) return new Vector(-1, -1);
+    else return new Vector(x,y);
 }
 
 function validStartingPoint(x,y, radius){
@@ -205,15 +217,20 @@ function checkCollisions(){
     for(x = 0; x < asteroids.length - 1; x++){
         for(y = x + 1; y < asteroids.length; y++){
             if(isTouching(asteroids[x], asteroids[y])){
-                var a = asteroids[x];
-                var b = asteroids[y];
-                console.log("game : ast : collision");
-                a.vel.x = (a.vel.x * (a.radiussq - b.radiussq) + (2 * b.radiussq * b.vel.x)) / 2;
-                a.vel.y = (a.vel.y * (a.radiussq - b.radiussq) + (2 * b.radiussq * b.vel.y)) / 2;
-                b.vel.x = (b.vel.x * (b.radiussq - a.radiussq) + (2 * a.radiussq * a.vel.x)) / 2;
-                b.vel.y = (b.vel.y * (b.radiussq - a.radiussq) + (2 * a.radiussq * a.vel.y)) / 2;
-                a.move();
-                b.move();
+                var a = asteroids[x], b = asteroids[y];
+                var xDist = a.pos.x - b.pos.x, yDist = a.pos.y - b.pos.y,
+				    xVel = b.vel.x - a.vel.x, yVel = b.vel.y - a.vel.y;
+				var dotProduct = xDist * xVel + yDist * yVel;
+                if(dotProduct > 0){
+                    var collisionScale = dotProduct / (xDist*xDist + yDist*yDist);
+                    var xCollision = xDist * collisionScale,
+                        yCollision = yDist * collisionScale;
+                    var combinedMass = a.radius + b.radius;
+                    var collWA = 2 * b.radius / combinedMass,
+                        collWB = 2 * a.radius / combinedMass;
+                    a.vel.translate(collWA * xCollision, collWA * yCollision);
+                    b.vel.translate(-collWB * xCollision, -collWB * yCollision);
+                }
             }
         }
     }
@@ -321,7 +338,7 @@ io.on("connection", function(socket){
     socket.on("nick", function(nick){
         craft = new Craft(socket, nick, Date.now());
         console.log("info : soc : " + nick + " joined");
-        craft.pos = findStartingPoint(100);
+        craft.pos = findStartingPoint(false, 100);
         crafts.push(craft);
         if(!running) startSim();
         io.emit("ready", craft.ID);
@@ -361,10 +378,10 @@ function sendShit(){
 
 initialSetUp();
 function initialSetUp(){
-    var numAsteroids = 20;
+    var numAsteroids = 100;
     for (var i = 0 ; i < numAsteroids ; i++){
         var newast = new Asteroid(Math.floor(Math.random() * 50) + 50);
-        newast.pos = findStartingPoint(400);
-        asteroids.push(newast);
+        newast.pos = findStartingPoint(true, 120);
+        if(newast.pos.x != -1) asteroids.push(newast);
     }
 }
