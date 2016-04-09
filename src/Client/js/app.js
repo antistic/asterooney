@@ -3,7 +3,7 @@ var ship_cvs, shipo_cvs, shipy_cvs;
 var flameToggle = true;
 
 var socket = io("http://localhost:3000");
-var nick, ID;
+var nick;
 
 // initialise stuff
 function init() {
@@ -175,9 +175,7 @@ function parse_condensed(items) {
     for (var i=0; i < r.length; i++) r[i] = r[i].split(",");
     return r;
 }
-socket.on("ready", function(IDd){
-    ID = IDd;
-
+socket.on("ready", function(){
     document.getElementById("Overlay").classList.add("hidden");
 
     window.addEventListener("keydown", keydownHandler);

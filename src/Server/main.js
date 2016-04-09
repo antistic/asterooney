@@ -305,7 +305,7 @@ function disposeOfDeadBodies(){
 
     for(var x = 0; x < crafts.length; x++)
         for(var y = r + 1; y < crafts.length; y++)
-            crafts[x].socket.emit("snuffed", crafts[x].ID === crafts[y].ID,
+            crafts[x].socket.emit("snuffed", crafts[x].birthtime === crafts[y].birthtime,
                     crafts[x].pos, crafts[y].pos);
 
     crafts = crafts.slice(0, r + 1);
@@ -341,7 +341,7 @@ io.on("connection", function(socket){
         craft.pos = findStartingPoint(false, 100);
         crafts.push(craft);
         if(!running) startSim();
-        io.emit("ready", craft.ID);
+        io.emit("ready");
     });
 
     socket.on("keys", function(key, on){
