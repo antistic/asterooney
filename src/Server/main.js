@@ -63,13 +63,6 @@ function Craft(socket, nick, birthtime){
         this.pos.translate(this.vel);
     };
 
-    this.tryFiring = function(){
-        if(this.firecooldown === 0){
-            this.firecooldown = 15;
-            this.firing = true;
-        }
-    };
-
     this.getCondensed = function(){
         var c = ",";
         return parseInt(this.pos.x, 10) +c+
@@ -188,8 +181,8 @@ function moveObjects(){
     var x;
     for(x = 0; x < crafts.length; x++){
         crafts[x].move();
-        if(crafts[x].firing){
-            crafts[x].firing = false;
+        if(crafts[x].firing && (crafts[x].firecooldown === 0)) {
+            crafts[x].firecooldown = 15;
             bullets.push(new Bullet(crafts[x]));
         }
     }
@@ -363,7 +356,7 @@ io.on("connection", function(socket){
             craft.breaking = on;
             break;
         case 32:    // spacebar
-            if(on) craft.tryFiring();
+            craft.firing = on;
         }
     });
 });
