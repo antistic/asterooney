@@ -62,13 +62,14 @@ function Craft(socket, nick, birthtime){
         }
         this.pos.translate(this.vel);
     };
+    
+    this.fired = function(){
+        this.firecooldown = 6;
+    }
 
-    this.tryFiring = function(){
-        if(this.firecooldown === 0){
-            this.firecooldown = 15;
-            this.firing = true;
-        }
-    };
+    this.canFire = function(){
+        return this.firing && this.firecooldown === 0;
+    }
 
     this.getCondensed = function(){
         var c = ",";
@@ -187,8 +188,8 @@ function moveObjects(){
     var x;
     for(x = 0; x < crafts.length; x++){
         crafts[x].move();
-        if(crafts[x].firing){
-            crafts[x].firing = false;
+        if(crafts[x].canFire()){
+            crafts[x].fired();
             bullets.push(new Bullet(crafts[x]));
         }
     }
@@ -362,7 +363,7 @@ io.on("connection", function(socket){
             craft.breaking = on;
             break;
         case 32:    // spacebar
-            if(on) craft.tryFiring();
+            craft.firing = on;
         }
     });
 });
