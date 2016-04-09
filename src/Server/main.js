@@ -63,6 +63,14 @@ function Craft(socket, nick, birthtime){
         this.pos.translate(this.vel);
     };
 
+    this.fired = function(){
+        this.firecooldown = 6;
+    };
+
+    this.canFire = function(){
+        return this.firing && this.firecooldown === 0;
+    };
+
     this.getCondensed = function(){
         var c = ",";
         return parseInt(this.pos.x, 10) +c+
@@ -180,8 +188,8 @@ function moveObjects(){
     var x;
     for(x = 0; x < crafts.length; x++){
         crafts[x].move();
-        if(crafts[x].firing && (crafts[x].firecooldown === 0)) {
-            crafts[x].firecooldown = 15;
+        if(crafts[x].canFire()){
+            crafts[x].fired();
             bullets.push(new Bullet(crafts[x]));
         }
     }
