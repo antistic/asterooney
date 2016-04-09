@@ -136,12 +136,12 @@ function drawCircle(contxt, x, y, radius, colour){
 }
 function drawCraft(x, y, craft){
     var nick = craft[2];
-    var rotation = craft[4];
+    var rotation = craft[3];
     ctx.fillText(nick, x, y - 40);
 
     ctx.translate(x, y);
     ctx.rotate(parseFloat(rotation) + 3.1416);
-    if (craft[5] === "1"){
+    if (craft[4] === "1"){
         if (flameToggle){
             ctx.drawImage(shipy_cvs, -24, -27);
         } else {
