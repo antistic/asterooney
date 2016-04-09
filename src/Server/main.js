@@ -24,6 +24,10 @@ function Vector(myX, myY){
         this.x = v.x; this.y = v.y;
         return this;
     };
+    this.set0 = function(x1, y1){
+        this.x = x1; this.y = y1;
+        return this;
+    }
 }
 
 function Craft(socket, nick, birthtime){
@@ -228,8 +232,8 @@ function checkCollisions(){
                     var combinedMass = a.radius + b.radius;
                     var collWA = 2 * b.radius / combinedMass,
                         collWB = 2 * a.radius / combinedMass;
-                    a.vel.translate(collWA * xCollision, collWA * yCollision);
-                    b.vel.translate(-collWB * xCollision, -collWB * yCollision);
+                    a.vel.set0(collWA * xCollision, collWA * yCollision);
+                    b.vel.set0(-collWB * xCollision, -collWB * yCollision);
                 }
             }
         }
