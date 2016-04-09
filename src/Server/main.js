@@ -152,7 +152,7 @@ function findStartingPoint(block, radius){
     var y = Math.floor(Math.random()*totalHeight);
 
     var maxTry = 1000;
-    
+
     while ((!block || maxTry-- > 0) && !validStartingPoint(x, y, radius)) {
         x = Math.floor(Math.random()*totalWidth);
         y = Math.floor(Math.random()*totalHeight);
@@ -219,8 +219,8 @@ function checkCollisions(){
             if(isTouching(asteroids[x], asteroids[y])){
                 var a = asteroids[x], b = asteroids[y];
                 var xDist = a.pos.x - b.pos.x, yDist = a.pos.y - b.pos.y,
-				    xVel = b.vel.x - a.vel.x, yVel = b.vel.y - a.vel.y;
-				var dotProduct = xDist * xVel + yDist * yVel;
+                    xVel = b.vel.x - a.vel.x, yVel = b.vel.y - a.vel.y;
+                var dotProduct = xDist * xVel + yDist * yVel;
                 if(dotProduct > 0){
                     var collisionScale = dotProduct / (xDist*xDist + yDist*yDist);
                     var xCollision = xDist * collisionScale,

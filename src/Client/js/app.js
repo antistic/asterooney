@@ -196,10 +196,14 @@ socket.on("snuffed", function(isMe, myPos, deadPos){
         ctx.font = "32pt Roboto";
         ctx.fillText("YOU DIED.", cvs.width/2, cvs.height/2 - 70);
         ctx.font = "20pt Roboto";
-        ctx.fillText("space to restart", cvs.width/2, cvs.height/2 + 70);
         window.removeEventListener("keydown", keydownHandler);
         window.removeEventListener("keyup", keyupHandler);
-        window.addEventListener("keyup", waitForRestart);
+        window.setTimeout(function(){
+            ctx.font = "20pt Roboto";
+            ctx.fillStyle = "white";
+            ctx.fillText("space to restart", cvs.width/2, cvs.height/2 + 70);
+            window.addEventListener("keyup", waitForRestart);
+        }, 750);
     }
 });
 function explosion(x, y, f){
