@@ -2,11 +2,20 @@ var cvs, ctx;
 var ship_cvs, shipo_cvs, shipy_cvs;
 var flameToggle = true;
 
-var socket = io("http://localhost:3000");
+// Try to make socket
+var socket;
+
+try{
+    socket = io(window.location.toString().split(":8000")[0] + ":3000");
+}catch(ex){
+    throw "No servers running here \U+1F50E";
+}
+
 var nick;
 
 // initialise stuff
 function init() {
+    
     // make canvas
     cvs = document.getElementById("canvas");
     ctx = cvs.getContext("2d");
