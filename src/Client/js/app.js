@@ -3,19 +3,17 @@ var ship_cvs, shipo_cvs, shipy_cvs;
 var flameToggle = true;
 
 // Try to make socket
-var socket;
-
-try{
-    socket = io(window.location.toString().split(":8000")[0] + ":3000");
-}catch(ex){
+var socket = io(window.location.href + ":3000");
+socket.on("connect_failed", function(){
     throw "No servers running here \U+1F50E";
-}
+});
+
+//socket.io.on("connect_error", callback)
 
 var nick;
 
 // initialise stuff
 function init() {
-    
     // make canvas
     cvs = document.getElementById("canvas");
     ctx = cvs.getContext("2d");
