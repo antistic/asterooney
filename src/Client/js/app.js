@@ -3,7 +3,7 @@ var ship_cvs, shipo_cvs, shipy_cvs;
 var flameToggle = true;
 
 // Try to make socket
-var socket = io(window.location.href + ":3000");
+var socket = io(window.location.hostname + ":3000");
 socket.on("connect_failed", function(){
     throw "No servers running here \U+1F50E";
 });
