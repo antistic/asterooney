@@ -8,8 +8,6 @@ socket.on("connect_failed", function(){
     throw "No servers running here \U+1F50E";
 });
 
-//socket.io.on("connect_error", callback)
-
 var nick;
 
 // initialise stuff
